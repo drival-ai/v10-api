@@ -6,6 +6,8 @@ import (
 
 	"cloud.google.com/go/spanner"
 	"github.com/drival-ai/v10-go/iam/v1"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 var (
@@ -20,4 +22,12 @@ type service struct {
 	clientOnce sync.Once
 
 	iam.UnimplementedIamServer
+}
+
+func (s *service) Login(req *iam.LoginRequest, stream iam.Iam_LoginServer) error {
+	return status.Errorf(codes.Unimplemented, "method Login not implemented")
+}
+
+func (s *service) WhoAmI(ctx context.Context, req *iam.WhoAmIRequest) (*iam.WhoAmIResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method WhoAmI not implemented")
 }
