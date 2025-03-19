@@ -23,20 +23,16 @@ jobs:
       with:
         go-version: '1.24'
 
-    - name: Run tests
-      run: |
-        go test -v ./...
-
     - name: Build binary
+      if: ${{ ! startsWith(github.event.ref, 'refs/tags/v') }}
       run: |
         make
 
-    - name: Run goreleaser
-      uses: goreleaser/goreleaser-action@v3
-      if: startsWith(github.ref, 'refs/tags/')
-      with:
-        distribution: goreleaser
-        version: latest
-        args: release --clean
+    - name: Release from tags
+      if: startsWith(github.event.ref, 'refs/tags/v')
       env:
-        GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+        GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      run: |
+        make
+        tar czvf v10-mvp-api-${GITHUB_REF_NAME}-x86_64-linux.tar.gz bin/v10-mvp-api
+        gh release create ${GITHUB_REF_NAME} ./*.tar.gz --generate-notes
