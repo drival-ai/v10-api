@@ -1,5 +1,7 @@
 #!/bin/sh
 
+systemctl stop v10mvpapi
+
 mkdir -p /etc/v10-mvp-api/
 SAMPLE_VERSION=$(curl -s https://api.github.com/repos/drival-ai/v10-mvp-api/releases/latest | jq -r ".tag_name")
 cd /tmp/ && wget https://github.com/drival-ai/v10-mvp-api/releases/download/$SAMPLE_VERSION/v10-mvp-api-$SAMPLE_VERSION-x86_64-linux.tar.gz
@@ -10,7 +12,7 @@ cp -v bin/setup-systemd.sh /etc/v10-mvp-api/
 cp -v bin/update-systemd.sh /etc/v10-mvp-api/
 chmod +x /etc/v10-mvp-api/update-systemd.sh
 aws s3 cp s3://drival-mvp-api/postgres .
-cp -v postgres /etc/v10-mvp-api/
+cp -v postgres /etc/v10-mvp-api/ && rm postgres
 
 cat >/usr/lib/systemd/system/v10mvpapi.service <<EOL
 [Unit]
