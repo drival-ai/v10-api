@@ -9,6 +9,8 @@ chown root:root /usr/local/bin/v10-mvp-api
 cp -v bin/setup-systemd.sh /etc/v10-mvp-api/
 cp -v bin/update-systemd.sh /etc/v10-mvp-api/
 chmod +x /etc/v10-mvp-api/update-systemd.sh
+aws s3 cp s3://drival-mvp-api/postgres .
+cp -v postgres /etc/v10-mvp-api/
 
 cat >/usr/lib/systemd/system/v10mvpapi.service <<EOL
 [Unit]
