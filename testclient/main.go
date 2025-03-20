@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"crypto/tls"
 	"encoding/json"
 	"flag"
 	"log/slog"
@@ -10,7 +9,6 @@ import (
 
 	"github.com/drival-ai/v10-go/iam/v1"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
 )
@@ -30,8 +28,9 @@ func main() {
 	if strings.Contains(*addr, "localhost") {
 		opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	} else {
-		creds := credentials.NewTLS(&tls.Config{InsecureSkipVerify: true})
-		opts = append(opts, grpc.WithTransportCredentials(creds))
+		opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
+		// creds := credentials.NewTLS(&tls.Config{InsecureSkipVerify: true})
+		// opts = append(opts, grpc.WithTransportCredentials(creds))
 	}
 
 	// ts, err := idtoken.NewTokenSource(ctx, "https://"+svc)
