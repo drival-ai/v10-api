@@ -1,4 +1,4 @@
-[![main](https://github.com/drival-ai/v10-mvp-api/actions/workflows/main.yml/badge.svg)](https://github.com/drival-ai/v10-mvp-api/actions/workflows/main.yml)
+[![main](https://github.com/drival-ai/v10-api/actions/workflows/main.yml/badge.svg)](https://github.com/drival-ai/v10-api/actions/workflows/main.yml)
 
 Update API binary with the latest tag:
 
