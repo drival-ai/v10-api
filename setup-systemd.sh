@@ -13,7 +13,7 @@ chown root:root /usr/local/bin/v10-api
 cp -v bin/setup-systemd.sh /etc/v10-api/
 cp -v bin/update-systemd.sh /etc/v10-api/
 chmod +x /etc/v10-api/update-systemd.sh
-aws s3 cp s3://drival-api/postgres .
+aws s3 cp s3://drival-mvp-api/postgres .
 cp -v postgres /etc/v10-api/ && rm postgres
 
 cat >/usr/lib/systemd/system/v10api.service <<EOL
