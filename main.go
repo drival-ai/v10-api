@@ -30,9 +30,9 @@ func run(ctx context.Context, network, port string, done chan error) error {
 
 	pgdsn := *params.PostgresDsn
 	if pgdsn == "" {
-		b, err := os.ReadFile("/etc/v10-api/postres")
+		b, err := os.ReadFile("/etc/v10-api/postgres")
 		if err != nil {
-			glog.Errorf("ReadFile(/etc/v10-api/postres) failed: %v", err)
+			glog.Errorf("ReadFile(/etc/v10-api/postgres) failed: %v", err)
 		} else {
 			pgdsn = string(b)
 		}
