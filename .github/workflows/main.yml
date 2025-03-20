@@ -35,6 +35,7 @@ jobs:
       run: |
         make
         cp -v setup-systemd.sh bin/
-        cp -v update-systemd.sh bin/
+        cp -v update-api.sh bin/
+        cp -v update-proxy.sh bin/
         tar czvf v10-api-${GITHUB_REF_NAME}-x86_64-linux.tar.gz bin/
         gh release create ${GITHUB_REF_NAME} ./*.tar.gz --generate-notes
