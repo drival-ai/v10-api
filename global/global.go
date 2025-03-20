@@ -7,3 +7,7 @@ import (
 var (
 	PgxPool *pgxpool.Pool
 )
+
+type Config struct {
+	PgDsn string `yaml:"pgdsn"`
+}

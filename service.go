@@ -4,7 +4,7 @@ import (
 	"context"
 	"sync"
 
-	"cloud.google.com/go/spanner"
+	"github.com/drival-ai/v10-api/global"
 	"github.com/drival-ai/v10-api/internal"
 	"github.com/drival-ai/v10-go/iam/v1"
 
@@ -23,9 +23,9 @@ var (
 
 type service struct {
 	ctx        context.Context
-	client     *spanner.Client
 	clientOnce sync.Once
 	UserInfo   internal.UserInfo
+	Config     *global.Config
 
 	iam.UnimplementedIamServer
 	base.UnimplementedV10Server

@@ -13,8 +13,8 @@ cp -v bin/update-api.sh /etc/v10-api/
 cp -v bin/update-proxy.sh /etc/v10-api/
 chmod +x /etc/v10-api/update-api.sh
 chmod +x /etc/v10-api/update-proxy.sh
-aws s3 cp s3://drival-mvp-api/postgres .
-cp -v postgres /etc/v10-api/ && rm postgres
+aws s3 cp s3://drival-mvp-api/config .
+cp -v config /etc/v10-api/ && rm config
 
 cat >/usr/lib/systemd/system/v10api.service <<EOL
 [Unit]

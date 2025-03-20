@@ -8,7 +8,6 @@ import (
 	"os/signal"
 	"syscall"
 
-	"cloud.google.com/go/spanner"
 	"github.com/drival-ai/v10-api/global"
 	"github.com/drival-ai/v10-api/internal"
 	"github.com/drival-ai/v10-api/params"
@@ -18,10 +17,7 @@ import (
 	"github.com/grpc-ecosystem/go-grpc-middleware/ratelimit"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"google.golang.org/grpc"
-)
-
-var (
-	client *spanner.Client
+	yaml "gopkg.in/yaml.v3"
 )
 
 func run(ctx context.Context, network, port string, done chan error) error {
@@ -31,19 +27,21 @@ func run(ctx context.Context, network, port string, done chan error) error {
 		return err
 	}
 
-	pgdsn := *params.PostgresDsn
-	if pgdsn == "" {
-		b, err := os.ReadFile("/etc/v10-api/postgres")
+	var config global.Config
+	if *params.ConfigFile != "" {
+		b, err := os.ReadFile(*params.ConfigFile)
 		if err != nil {
-			glog.Errorf("ReadFile(/etc/v10-api/postgres) failed: %v", err)
+			glog.Fatalf("ReadFile(%v) failed: %v", *params.ConfigFile, err)
 		} else {
-			pgdsn = string(b)
-			pgdsn = pgdsn[:len(pgdsn)-1] // remove last newline
+			err := yaml.Unmarshal(b, &config)
+			if err != nil {
+				glog.Fatalf("Unmarshal failed: %v", err)
+			}
 		}
 	}
 
 	// Test connection to RDS/Postgres:
-	global.PgxPool, err = pgxpool.New(ctx, pgdsn)
+	global.PgxPool, err = pgxpool.New(ctx, config.PgDsn)
 	if err != nil {
 		glog.Errorf("pgxpool.New failed: %v", err)
 	} else {
@@ -73,7 +71,7 @@ func run(ctx context.Context, network, port string, done chan error) error {
 		),
 	)
 
-	svc := &service{ctx: ctx, client: client}
+	svc := &service{ctx: ctx}
 	iam.RegisterIamServer(gs, svc)
 	base.RegisterV10Server(gs, svc)
 

@@ -5,5 +5,5 @@ import (
 )
 
 var (
-	PostgresDsn = flag.String("pgdsn", "", "Postgres DSN (Data Source Name)")
+	ConfigFile = flag.String("config", "/etc/v10-api/config", "Config file")
 )
