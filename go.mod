@@ -7,6 +7,7 @@ require (
 	github.com/drival-ai/v10-go v0.0.0-20250304130242-78da674704fa
 	github.com/golang/glog v1.2.4
 	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
+	github.com/jackc/pgx/v5 v5.7.2
 	google.golang.org/api v0.227.0
 	google.golang.org/grpc v1.71.0
 )
@@ -33,6 +34,9 @@ require (
 	github.com/googleapis/enterprise-certificate-proxy v0.3.6 // indirect
 	github.com/googleapis/gax-go/v2 v2.14.1 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.22.0 // indirect
+	github.com/jackc/pgpassfile v1.0.0 // indirect
+	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
+	github.com/jackc/puddle/v2 v2.2.2 // indirect
 	github.com/planetscale/vtprotobuf v0.6.1-0.20240319094008-0393e58bdf10 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect

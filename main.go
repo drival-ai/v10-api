@@ -9,11 +9,13 @@ import (
 	"syscall"
 
 	"cloud.google.com/go/spanner"
+	"github.com/drival-ai/v10-api/global"
 	"github.com/drival-ai/v10-api/internal"
 	"github.com/drival-ai/v10-api/params"
 	"github.com/drival-ai/v10-go/iam/v1"
 	"github.com/golang/glog"
 	"github.com/grpc-ecosystem/go-grpc-middleware/ratelimit"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"google.golang.org/grpc"
 )
 
@@ -38,7 +40,18 @@ func run(ctx context.Context, network, port string, done chan error) error {
 		}
 	}
 
-	glog.Infof("pg=%v", pgdsn)
+	// Test connection to RDS/Postgres:
+	global.PgxPool, err = pgxpool.New(ctx, pgdsn)
+	if err != nil {
+		glog.Errorf("pgxpool.New failed: %v", err)
+	} else {
+		err = global.PgxPool.Ping(ctx)
+		if err != nil {
+			glog.Errorf("Ping failed: %v", err)
+		} else {
+			glog.Info("ping ok")
+		}
+	}
 
 	defer l.Close()
 	internalData := &internal.InternalData{

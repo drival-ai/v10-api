@@ -1,9 +1,9 @@
 package global
 
 import (
-	"cloud.google.com/go/spanner"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 var (
-	Client *spanner.Client // connection to Spanner
+	PgxPool *pgxpool.Pool
 )
