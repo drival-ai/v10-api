@@ -10,6 +10,7 @@ import (
 
 	"cloud.google.com/go/spanner"
 	"github.com/drival-ai/v10-api/internal"
+	"github.com/drival-ai/v10-api/params"
 	"github.com/drival-ai/v10-go/iam/v1"
 	"github.com/golang/glog"
 	"github.com/grpc-ecosystem/go-grpc-middleware/ratelimit"
@@ -26,6 +27,18 @@ func run(ctx context.Context, network, port string, done chan error) error {
 		glog.Errorf("net.Listen failed: %v", err)
 		return err
 	}
+
+	pgdsn := *params.PostgresDsn
+	if pgdsn == "" {
+		b, err := os.ReadFile("/etc/v10-api/postres")
+		if err != nil {
+			glog.Errorf("ReadFile(/etc/v10-api/postres) failed: %v", err)
+		} else {
+			pgdsn = string(b)
+		}
+	}
+
+	glog.Infof("pg=%v", pgdsn)
 
 	defer l.Close()
 	internalData := &internal.InternalData{

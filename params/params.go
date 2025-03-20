@@ -5,5 +5,5 @@ import (
 )
 
 var (
-	PostgresDsn = flag.String("pg", "", "Postgres DSN (Data Source Name)")
+	PostgresDsn = flag.String("pgdsn", "", "Postgres DSN (Data Source Name)")
 )
