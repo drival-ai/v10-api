@@ -1,18 +1,18 @@
 #!/bin/sh
 
 # Setup the main API binary:
-
-systemctl stop v10api
-
 mkdir -p /etc/v10-api/
 VERSION=$(curl -s https://api.github.com/repos/drival-ai/v10-api/releases/latest | jq -r ".tag_name")
 cd /tmp/ && wget https://github.com/drival-ai/v10-api/releases/download/$VERSION/v10-api-$VERSION-x86_64-linux.tar.gz
 tar xvzf v10-api-$VERSION-x86_64-linux.tar.gz
+systemctl stop v10api
 cp -v bin/v10-api /usr/local/bin/
 chown root:root /usr/local/bin/v10-api
 cp -v bin/setup-systemd.sh /etc/v10-api/
-cp -v bin/update-systemd.sh /etc/v10-api/
-chmod +x /etc/v10-api/update-systemd.sh
+cp -v bin/update-api.sh /etc/v10-api/
+cp -v bin/update-proxy.sh /etc/v10-api/
+chmod +x /etc/v10-api/update-api.sh
+chmod +x /etc/v10-api/update-proxy.sh
 aws s3 cp s3://drival-mvp-api/postgres .
 cp -v postgres /etc/v10-api/ && rm postgres
 
@@ -39,12 +39,10 @@ rm -rfv bin/
 rm v10-api-$VERSION-x86_64-linux.tar.gz
 
 # Setup API proxy:
-
-systemctl stop v10apiproxy
-
 PROXY_VERSION=$(curl -s https://api.github.com/repos/drival-ai/v10-api-proxy/releases/latest | jq -r ".tag_name")
 cd /tmp/ && wget https://github.com/drival-ai/v10-api-proxy/releases/download/$PROXY_VERSION/v10-api-proxy-$PROXY_VERSION-x86_64-linux.tar.gz
 tar xvzf v10-api-proxy-$PROXY_VERSION-x86_64-linux.tar.gz
+systemctl stop v10apiproxy
 cp -v v10-api-proxy /usr/local/bin/
 chown root:root /usr/local/bin/v10-api-proxy
 
