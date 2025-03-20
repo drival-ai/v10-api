@@ -9,8 +9,8 @@ import (
 	"syscall"
 
 	"cloud.google.com/go/spanner"
+	"github.com/drival-ai/v10-api/internal"
 	"github.com/drival-ai/v10-go/iam/v1"
-	"github.com/drival-ai/v10-mvp-api/internal"
 	"github.com/golang/glog"
 	"github.com/grpc-ecosystem/go-grpc-middleware/ratelimit"
 	"google.golang.org/grpc"

@@ -2,19 +2,19 @@
 
 # Setup the main API binary:
 
-systemctl stop v10mvpapi
+systemctl stop v10api
 
-mkdir -p /etc/v10-mvp-api/
-VERSION=$(curl -s https://api.github.com/repos/drival-ai/v10-mvp-api/releases/latest | jq -r ".tag_name")
-cd /tmp/ && wget https://github.com/drival-ai/v10-mvp-api/releases/download/$VERSION/v10-mvp-api-$VERSION-x86_64-linux.tar.gz
-tar xvzf v10-mvp-api-$VERSION-x86_64-linux.tar.gz
-cp -v bin/v10-mvp-api /usr/local/bin/
-chown root:root /usr/local/bin/v10-mvp-api
-cp -v bin/setup-systemd.sh /etc/v10-mvp-api/
-cp -v bin/update-systemd.sh /etc/v10-mvp-api/
-chmod +x /etc/v10-mvp-api/update-systemd.sh
-aws s3 cp s3://drival-mvp-api/postgres .
-cp -v postgres /etc/v10-mvp-api/ && rm postgres
+mkdir -p /etc/v10-api/
+VERSION=$(curl -s https://api.github.com/repos/drival-ai/v10-api/releases/latest | jq -r ".tag_name")
+cd /tmp/ && wget https://github.com/drival-ai/v10-api/releases/download/$VERSION/v10-api-$VERSION-x86_64-linux.tar.gz
+tar xvzf v10-api-$VERSION-x86_64-linux.tar.gz
+cp -v bin/v10-api /usr/local/bin/
+chown root:root /usr/local/bin/v10-api
+cp -v bin/setup-systemd.sh /etc/v10-api/
+cp -v bin/update-systemd.sh /etc/v10-api/
+chmod +x /etc/v10-api/update-systemd.sh
+aws s3 cp s3://drival-api/postgres .
+cp -v postgres /etc/v10-api/ && rm postgres
 
 cat >/usr/lib/systemd/system/v10mvpapi.service <<EOL
 [Unit]
@@ -24,7 +24,7 @@ Description=V10 MVP API
 Type=simple
 Restart=always
 RestartSec=10
-ExecStart=/usr/local/bin/v10-mvp-api -logtostderr
+ExecStart=/usr/local/bin/v10-api -logtostderr
 
 [Install]
 WantedBy=multi-user.target
@@ -36,17 +36,17 @@ systemctl start v10mvpapi
 systemctl status v10mvpapi
 
 rm -rfv bin/
-rm v10-mvp-api-$VERSION-x86_64-linux.tar.gz
+rm v10-api-$VERSION-x86_64-linux.tar.gz
 
 # Setup API proxy:
 
 systemctl stop v10mvpapiproxy
 
-PROXY_VERSION=$(curl -s https://api.github.com/repos/drival-ai/v10-mvp-api-proxy/releases/latest | jq -r ".tag_name")
-cd /tmp/ && wget https://github.com/drival-ai/v10-mvp-api-proxy/releases/download/$PROXY_VERSION/v10-mvp-api-proxy-$PROXY_VERSION-x86_64-linux.tar.gz
-tar xvzf v10-mvp-api-proxy-$PROXY_VERSION-x86_64-linux.tar.gz
-cp -v v10-mvp-api-proxy /usr/local/bin/
-chown root:root /usr/local/bin/v10-mvp-api-proxy
+PROXY_VERSION=$(curl -s https://api.github.com/repos/drival-ai/v10-api-proxy/releases/latest | jq -r ".tag_name")
+cd /tmp/ && wget https://github.com/drival-ai/v10-api-proxy/releases/download/$PROXY_VERSION/v10-api-proxy-$PROXY_VERSION-x86_64-linux.tar.gz
+tar xvzf v10-api-proxy-$PROXY_VERSION-x86_64-linux.tar.gz
+cp -v v10-api-proxy /usr/local/bin/
+chown root:root /usr/local/bin/v10-api-proxy
 
 cat >/usr/lib/systemd/system/v10mvpapiproxy.service <<EOL
 [Unit]
@@ -56,7 +56,7 @@ Description=V10 MVP API Proxy
 Type=simple
 Restart=always
 RestartSec=10
-ExecStart=/usr/local/bin/v10-mvp-api-proxy -logtostderr
+ExecStart=/usr/local/bin/v10-api-proxy -logtostderr
 
 [Install]
 WantedBy=multi-user.target
@@ -67,5 +67,5 @@ systemctl enable v10mvpapiproxy
 systemctl start v10mvpapiproxy
 systemctl status v10mvpapiproxy
 
-rm v10-mvp-api-proxy
-rm v10-mvp-api-proxy-$PROXY_VERSION-x86_64-linux.tar.gz
+rm v10-api-proxy
+rm v10-api-proxy-$PROXY_VERSION-x86_64-linux.tar.gz

@@ -1,4 +1,4 @@
-module github.com/drival-ai/v10-mvp-api
+module github.com/drival-ai/v10-api
 
 go 1.24.1
 
