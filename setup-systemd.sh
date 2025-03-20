@@ -16,9 +16,9 @@ chmod +x /etc/v10-api/update-systemd.sh
 aws s3 cp s3://drival-api/postgres .
 cp -v postgres /etc/v10-api/ && rm postgres
 
-cat >/usr/lib/systemd/system/v10mvpapi.service <<EOL
+cat >/usr/lib/systemd/system/v10api.service <<EOL
 [Unit]
-Description=V10 MVP API
+Description=V10 API
 
 [Service]
 Type=simple
@@ -31,16 +31,16 @@ WantedBy=multi-user.target
 EOL
 
 systemctl daemon-reload
-systemctl enable v10mvpapi
-systemctl start v10mvpapi
-systemctl status v10mvpapi
+systemctl enable v10api
+systemctl start v10api
+systemctl status v10api
 
 rm -rfv bin/
 rm v10-api-$VERSION-x86_64-linux.tar.gz
 
 # Setup API proxy:
 
-systemctl stop v10mvpapiproxy
+systemctl stop v10apiproxy
 
 PROXY_VERSION=$(curl -s https://api.github.com/repos/drival-ai/v10-api-proxy/releases/latest | jq -r ".tag_name")
 cd /tmp/ && wget https://github.com/drival-ai/v10-api-proxy/releases/download/$PROXY_VERSION/v10-api-proxy-$PROXY_VERSION-x86_64-linux.tar.gz
@@ -48,9 +48,9 @@ tar xvzf v10-api-proxy-$PROXY_VERSION-x86_64-linux.tar.gz
 cp -v v10-api-proxy /usr/local/bin/
 chown root:root /usr/local/bin/v10-api-proxy
 
-cat >/usr/lib/systemd/system/v10mvpapiproxy.service <<EOL
+cat >/usr/lib/systemd/system/v10apiproxy.service <<EOL
 [Unit]
-Description=V10 MVP API Proxy
+Description=V10 API Proxy
 
 [Service]
 Type=simple
@@ -63,9 +63,9 @@ WantedBy=multi-user.target
 EOL
 
 systemctl daemon-reload
-systemctl enable v10mvpapiproxy
-systemctl start v10mvpapiproxy
-systemctl status v10mvpapiproxy
+systemctl enable v10apiproxy
+systemctl start v10apiproxy
+systemctl status v10apiproxy
 
 rm v10-api-proxy
 rm v10-api-proxy-$PROXY_VERSION-x86_64-linux.tar.gz
