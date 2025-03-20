@@ -54,8 +54,7 @@ func run(ctx context.Context, network, port string, done chan error) error {
 	}
 
 	defer l.Close()
-	internalData := &internal.InternalData{
-		RunEnv:   "",
+	auth := &internal.Auth{
 		Audience: "https://",
 	}
 
@@ -63,15 +62,15 @@ func run(ctx context.Context, network, port string, done chan error) error {
 	gs := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
 			ratelimit.UnaryServerInterceptor(&limiter{}),
-			grpc.UnaryServerInterceptor(internalData.UnaryInterceptor),
+			grpc.UnaryServerInterceptor(auth.UnaryInterceptor),
 		),
 		grpc.ChainStreamInterceptor(
 			ratelimit.StreamServerInterceptor(&limiter{}),
-			grpc.StreamServerInterceptor(internalData.StreamInterceptor),
+			grpc.StreamServerInterceptor(auth.StreamInterceptor),
 		),
 	)
 
-	svc := &service{ctx: ctx}
+	svc := &service{ctx: ctx, Config: &config}
 	iam.RegisterIamServer(gs, svc)
 	base.RegisterV10Server(gs, svc)
 

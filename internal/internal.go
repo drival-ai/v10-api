@@ -35,12 +35,11 @@ type UserInfo struct {
 	Email string
 }
 
-type InternalData struct {
-	RunEnv   string // dev,next, prod
-	Audience string // audience for token validation (CloudRun)
+type Auth struct {
+	Audience string // audience for token validation
 }
 
-func (d *InternalData) verifyCaller(ctx context.Context, md metadata.MD) (UserInfo, error) {
+func (a *Auth) verifyCaller(ctx context.Context, md metadata.MD) (UserInfo, error) {
 	glog.Infof("metadata: %v", md)
 
 	var token string
@@ -57,7 +56,7 @@ func (d *InternalData) verifyCaller(ctx context.Context, md metadata.MD) (UserIn
 		return UserInfo{}, unauthorizedCallerErr
 	}
 
-	payload, err := idtoken.Validate(ctx, token, d.Audience)
+	payload, err := idtoken.Validate(ctx, token, a.Audience)
 	if err != nil {
 		glog.Errorf("Validate failed: %v", err)
 		return UserInfo{}, err
@@ -97,14 +96,14 @@ func (d *InternalData) verifyCaller(ctx context.Context, md metadata.MD) (UserIn
 	return UserInfo{Email: email}, nil
 }
 
-func (d *InternalData) UnaryInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, h grpc.UnaryHandler) (interface{}, error) {
+func (a *Auth) UnaryInterceptor(ctx context.Context, req any, info *grpc.UnaryServerInfo, h grpc.UnaryHandler) (any, error) {
 	defer func(begin time.Time) {
 		glog.Infof("[unary] << %v duration: %v", info.FullMethod, time.Since(begin))
 	}(time.Now())
 
 	glog.Infof("[unary] >> %v", info.FullMethod)
 	md, _ := metadata.FromIncomingContext(ctx)
-	u, err := d.verifyCaller(ctx, md)
+	u, err := a.verifyCaller(ctx, md)
 	if err != nil {
 		return nil, unauthorizedCallerErr
 	}
@@ -138,14 +137,14 @@ func newStreamContextWrapper(inner grpc.ServerStream) StreamContextWrapper {
 	return &wrapper{inner, ctx}
 }
 
-func (d *InternalData) StreamInterceptor(srv interface{}, stream grpc.ServerStream, info *grpc.StreamServerInfo, h grpc.StreamHandler) error {
+func (a *Auth) StreamInterceptor(srv any, stream grpc.ServerStream, info *grpc.StreamServerInfo, h grpc.StreamHandler) error {
 	defer func(begin time.Time) {
 		glog.Infof("[stream] << %v duration: %v", info.FullMethod, time.Since(begin))
 	}(time.Now())
 
 	glog.Infof("[stream] >> %v", info.FullMethod)
 	md, _ := metadata.FromIncomingContext(stream.Context())
-	u, err := d.verifyCaller(stream.Context(), md)
+	u, err := a.verifyCaller(stream.Context(), md)
 	if err != nil {
 		return unauthorizedCallerErr
 	}
