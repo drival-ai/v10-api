@@ -4,7 +4,7 @@ Update API binary with the latest tag:
 
 ```sh
 $ ssh -i key.pem ec2-user@0.0.0.0 \
-  -t 'sudo systemctl stop v10mvpapi && /etc/v10-mvp-api/update-systemd.sh'
+  -t 'sudo systemctl stop v10api && /etc/v10-api/update-systemd.sh'
 ```
 
 Setup systemd service (only needed for the first time):
