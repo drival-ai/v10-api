@@ -41,8 +41,6 @@ func run(ctx context.Context, network, port string, done chan error) error {
 		}
 	}
 
-	glog.Infof("pgdsn=%v", pgdsn)
-
 	// Test connection to RDS/Postgres:
 	global.PgxPool, err = pgxpool.New(ctx, pgdsn)
 	if err != nil {
