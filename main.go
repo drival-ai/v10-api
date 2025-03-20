@@ -37,7 +37,7 @@ func run(ctx context.Context, network, port string, done chan error) error {
 			glog.Errorf("ReadFile(/etc/v10-api/postgres) failed: %v", err)
 		} else {
 			pgdsn = string(b)
-			pgdsn = pgdsn[:len(pgdsn)-1]
+			pgdsn = pgdsn[:len(pgdsn)-1] // remove last newline
 		}
 	}
 
