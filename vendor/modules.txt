@@ -64,8 +64,9 @@ github.com/cncf/xds/go/xds/data/orca/v3
 github.com/cncf/xds/go/xds/service/orca/v3
 github.com/cncf/xds/go/xds/type/matcher/v3
 github.com/cncf/xds/go/xds/type/v3
-# github.com/drival-ai/v10-go v0.1.0
+# github.com/drival-ai/v10-go v0.1.1
 ## explicit; go 1.23.0
+github.com/drival-ai/v10-go/base/v1
 github.com/drival-ai/v10-go/conn
 github.com/drival-ai/v10-go/iam/v1
 # github.com/envoyproxy/go-control-plane/envoy v1.32.4

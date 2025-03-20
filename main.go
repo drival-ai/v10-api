@@ -12,6 +12,7 @@ import (
 	"github.com/drival-ai/v10-api/global"
 	"github.com/drival-ai/v10-api/internal"
 	"github.com/drival-ai/v10-api/params"
+	"github.com/drival-ai/v10-go/base/v1"
 	"github.com/drival-ai/v10-go/iam/v1"
 	"github.com/golang/glog"
 	"github.com/grpc-ecosystem/go-grpc-middleware/ratelimit"
@@ -74,6 +75,7 @@ func run(ctx context.Context, network, port string, done chan error) error {
 
 	svc := &service{ctx: ctx, client: client}
 	iam.RegisterIamServer(gs, svc)
+	base.RegisterV10Server(gs, svc)
 
 	go func() {
 		<-ctx.Done()
