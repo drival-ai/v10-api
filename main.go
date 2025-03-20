@@ -11,7 +11,6 @@ import (
 	"cloud.google.com/go/spanner"
 	"github.com/drival-ai/v10-go/iam/v1"
 	"github.com/drival-ai/v10-mvp-api/internal"
-	"github.com/drival-ai/v10-mvp-api/params"
 	"github.com/golang/glog"
 	"github.com/grpc-ecosystem/go-grpc-middleware/ratelimit"
 	"google.golang.org/grpc"
@@ -30,7 +29,7 @@ func run(ctx context.Context, network, port string, done chan error) error {
 
 	defer l.Close()
 	internalData := &internal.InternalData{
-		RunEnv:   *params.Env,
+		RunEnv:   "",
 		Audience: "https://",
 	}
 
