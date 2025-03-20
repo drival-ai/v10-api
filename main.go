@@ -37,8 +37,11 @@ func run(ctx context.Context, network, port string, done chan error) error {
 			glog.Errorf("ReadFile(/etc/v10-api/postgres) failed: %v", err)
 		} else {
 			pgdsn = string(b)
+			pgdsn = pgdsn[:len(pgdsn)-1]
 		}
 	}
+
+	glog.Infof("pgdsn=%v", pgdsn)
 
 	// Test connection to RDS/Postgres:
 	global.PgxPool, err = pgxpool.New(ctx, pgdsn)
