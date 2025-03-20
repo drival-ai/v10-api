@@ -7,9 +7,9 @@ sudo cp -v bin/v10-api /usr/local/bin/v10-api
 sudo chown root:root /usr/local/bin/v10-api
 
 sudo systemctl daemon-reload
-sudo systemctl enable v10mvpapi
-sudo systemctl start v10mvpapi
-sudo systemctl status v10mvpapi
+sudo systemctl enable v10api
+sudo systemctl start v10api
+sudo systemctl status v10api
 
 rm -rfv bin/
 rm v10-api-$VERSION-x86_64-linux.tar.gz

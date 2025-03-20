@@ -36,5 +36,5 @@ jobs:
         make
         cp -v setup-systemd.sh bin/
         cp -v update-systemd.sh bin/
-        tar czvf v10-mvp-api-${GITHUB_REF_NAME}-x86_64-linux.tar.gz bin/
+        tar czvf v10-api-${GITHUB_REF_NAME}-x86_64-linux.tar.gz bin/
         gh release create ${GITHUB_REF_NAME} ./*.tar.gz --generate-notes
