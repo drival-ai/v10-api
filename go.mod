@@ -4,7 +4,7 @@ go 1.24.1
 
 require (
 	cloud.google.com/go/spanner v1.77.0
-	github.com/drival-ai/v10-go v0.1.1
+	github.com/drival-ai/v10-go v0.1.2
 	github.com/golang/glog v1.2.4
 	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
 	github.com/jackc/pgx/v5 v5.7.2

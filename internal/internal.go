@@ -31,7 +31,7 @@ var (
 	}
 )
 
-type userInfo struct {
+type UserInfo struct {
 	Email string
 }
 
@@ -40,7 +40,7 @@ type InternalData struct {
 	Audience string // audience for token validation (CloudRun)
 }
 
-func (d *InternalData) verifyCaller(ctx context.Context, md metadata.MD) (userInfo, error) {
+func (d *InternalData) verifyCaller(ctx context.Context, md metadata.MD) (UserInfo, error) {
 	glog.Infof("metadata: %v", md)
 
 	var token string
@@ -54,13 +54,13 @@ func (d *InternalData) verifyCaller(ctx context.Context, md metadata.MD) (userIn
 
 	if token == "" {
 		glog.Errorf("failed: unauthorized call")
-		return userInfo{}, unauthorizedCallerErr
+		return UserInfo{}, unauthorizedCallerErr
 	}
 
 	payload, err := idtoken.Validate(ctx, token, d.Audience)
 	if err != nil {
 		glog.Errorf("Validate failed: %v", err)
-		return userInfo{}, err
+		return UserInfo{}, err
 	}
 
 	b, _ := json.Marshal(payload)
@@ -74,7 +74,7 @@ func (d *InternalData) verifyCaller(ctx context.Context, md metadata.MD) (userIn
 
 	if !emailVerified {
 		glog.Errorf("failed: email not verified")
-		return userInfo{}, unauthorizedCallerErr
+		return UserInfo{}, unauthorizedCallerErr
 	}
 
 	var email string
@@ -91,10 +91,10 @@ func (d *InternalData) verifyCaller(ctx context.Context, md metadata.MD) (userIn
 
 	if !validEmail {
 		glog.Errorf("failed: invalid email")
-		return userInfo{}, unauthorizedCallerErr
+		return UserInfo{}, unauthorizedCallerErr
 	}
 
-	return userInfo{Email: email}, nil
+	return UserInfo{Email: email}, nil
 }
 
 func (d *InternalData) UnaryInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, h grpc.UnaryHandler) (interface{}, error) {
