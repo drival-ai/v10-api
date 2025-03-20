@@ -29,5 +29,5 @@ func (s *service) Login(req *iam.LoginRequest, stream iam.Iam_LoginServer) error
 }
 
 func (s *service) WhoAmI(ctx context.Context, req *iam.WhoAmIRequest) (*iam.WhoAmIResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method WhoAmI not implemented")
+	return &iam.WhoAmIResponse{Name: "V10 MVP"}, nil
 }
