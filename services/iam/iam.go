@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strings"
 
 	"github.com/drival-ai/v10-api/global"
 	"github.com/drival-ai/v10-api/internal"
@@ -12,7 +11,6 @@ import (
 	"github.com/golang/glog"
 	"google.golang.org/api/idtoken"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 )
 
@@ -26,25 +24,16 @@ type svc struct {
 }
 
 func (s *svc) Register(ctx context.Context, req *iam.RegisterRequest) (*iam.RegisterResponse, error) {
-	md, _ := metadata.FromIncomingContext(ctx)
-
-	glog.Infof("metadata: %v", md)
-
-	var token string
-	v := md.Get("authorization")
-	if len(v) > 0 {
-		tt := strings.Split(v[0], " ")
-		if strings.ToLower(tt[0]) == "bearer" {
-			token = tt[1]
-		}
-	}
-
-	if token == "" {
-		glog.Errorf("failed: unauthorized call")
+	if req == nil {
 		return nil, internal.UnauthorizedCallerErr
 	}
 
-	payload, err := idtoken.Validate(ctx, token, s.Config.Config.AndroidClientId)
+	if req.Token == "" {
+		glog.Errorf("failed: empty token")
+		return nil, internal.UnauthorizedCallerErr
+	}
+
+	payload, err := idtoken.Validate(ctx, req.Token, s.Config.Config.AndroidClientId)
 	if err != nil {
 		glog.Errorf("Validate failed: %v", err)
 		return nil, internal.UnauthorizedCallerErr
@@ -74,25 +63,16 @@ func (s *svc) Register(ctx context.Context, req *iam.RegisterRequest) (*iam.Regi
 }
 
 func (s *svc) Login(ctx context.Context, req *iam.LoginRequest) (*iam.LoginResponse, error) {
-	md, _ := metadata.FromIncomingContext(ctx)
-
-	glog.Infof("metadata: %v", md)
-
-	var token string
-	v := md.Get("authorization")
-	if len(v) > 0 {
-		tt := strings.Split(v[0], " ")
-		if strings.ToLower(tt[0]) == "bearer" {
-			token = tt[1]
-		}
-	}
-
-	if token == "" {
-		glog.Errorf("failed: unauthorized call")
+	if req == nil {
 		return nil, internal.UnauthorizedCallerErr
 	}
 
-	payload, err := idtoken.Validate(ctx, token, s.Config.Config.AndroidClientId)
+	if req.Token == "" {
+		glog.Errorf("failed: empty token")
+		return nil, internal.UnauthorizedCallerErr
+	}
+
+	payload, err := idtoken.Validate(ctx, req.Token, s.Config.Config.AndroidClientId)
 	if err != nil {
 		glog.Errorf("Validate failed: %v", err)
 		return nil, internal.UnauthorizedCallerErr
