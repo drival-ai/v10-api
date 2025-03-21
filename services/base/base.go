@@ -84,4 +84,38 @@ func (s *svc) RegisterVehicle(ctx context.Context, in *base.RegisterVehicleReque
 	return &emptypb.Empty{}, nil
 }
 
+func (s *svc) ListVehicles(ctx context.Context, in *base.ListVehiclesRequest) (*base.ListVehiclesResponse, error) {
+	var q strings.Builder
+	fmt.Fprintf(&q, "select id, chassis_number, vin, ")
+	fmt.Fprintf(&q, "make, model, year, kms ")
+	fmt.Fprintf(&q, "from vehicles ")
+	fmt.Fprintf(&q, "where user_id = $1")
+	rows, err := global.PgxPool.Query(ctx, q.String(), s.Config.UserInfo.Id)
+	if err != nil {
+		glog.Errorf("Query failed: %v", err)
+		return nil, internal.InternalErr
+	}
+	defer rows.Close()
+
+	var vehicles []*base.Vehicle
+	for rows.Next() {
+		var v base.Vehicle
+		err = rows.Scan(&v.Id, &v.ChassisNumber, &v.Vin,
+			&v.Make, &v.Model, &v.Year, &v.Kilometers)
+		if err != nil {
+			glog.Errorf("Scan failed: %v", err)
+			return nil, internal.InternalErr
+		}
+		vehicles = append(vehicles, &v)
+	}
+
+	if err = rows.Err(); err != nil {
+		glog.Errorf("rows.Err failed: %v", err)
+		return nil, internal.InternalErr
+	}
+
+	glog.Infof("ListVehicles success!")
+	return &base.ListVehiclesResponse{Vehicles: vehicles}, nil
+}
+
 func New(config *Config) *svc { return &svc{Config: config} }
