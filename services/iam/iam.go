@@ -5,6 +5,7 @@ import (
 	"crypto/rsa"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/drival-ai/v10-api/global"
@@ -13,6 +14,7 @@ import (
 	jwtv5 "github.com/golang-jwt/jwt/v5"
 	"github.com/golang/glog"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"google.golang.org/api/idtoken"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -112,7 +114,47 @@ func (s *svc) Login(ctx context.Context, req *iam.LoginRequest) (*iam.LoginRespo
 		glog.Infof("azp=%v", azp)
 	}
 
-	// TODO: Save these info to users table.
+	// See if already registered.
+	var qId, qEmail string
+	var q strings.Builder
+	fmt.Fprintf(&q, "select id, email from users ")
+	fmt.Fprintf(&q, "where id = $1 ")
+	err = global.PgxPool.QueryRow(ctx, q.String(), sub).Scan(&qId, &qEmail)
+	if err != nil {
+		glog.Errorf("QueryRow failed: %v", err)
+		return nil, internal.InternalErr
+	}
+
+	var found bool
+	if qId != "" && qEmail == email {
+		found = true
+	}
+
+	// Add to db.
+	if !found {
+		q.Reset()
+		fmt.Fprintf(&q, "insert into users (id, email, email_verified, ")
+		fmt.Fprintf(&q, "family_name, given_name, full_name, picture, ")
+		fmt.Fprintf(&q, "aud, azp) values (@id, @email, @verified, ")
+		fmt.Fprintf(&q, "@family, @given, @full, @pic, @aud, @azp)")
+		args := pgx.NamedArgs{
+			"id":       sub,
+			"email":    email,
+			"verified": emailVerified,
+			"family":   familyName,
+			"given":    givenName,
+			"full":     fullName,
+			"pic":      picture,
+			"aud":      aud,
+			"azp":      azp,
+		}
+
+		_, err = global.PgxPool.Exec(ctx, q.String(), args)
+		if err != nil {
+			glog.Errorf("Exec failed: %v", err)
+			return nil, internal.InternalErr
+		}
+	}
 
 	currentTime := time.Now().UTC()
 	atClaims := jwtv5.MapClaims{}

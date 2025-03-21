@@ -25,6 +25,7 @@ const (
 
 var (
 	UnauthorizedCallerErr = status.Errorf(codes.Unauthenticated, "Unauthorized caller.")
+	InternalErr           = status.Errorf(codes.Internal, "Internal error.")
 
 	allowed = []string{
 		"@labs-169405.iam.gserviceaccount.com",  // dev
