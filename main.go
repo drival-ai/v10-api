@@ -65,32 +65,6 @@ func run(ctx context.Context, network, port string, done chan error) error {
 		glog.Fatalf("ParseRSAPrivateKeyFromPEM failed: %v", err)
 	}
 
-	// currentTime := time.Now()
-	// atClaims := jwtv5.MapClaims{}
-	// atClaims["iss"] = "app.alphaus.cloud"
-	// atClaims["aud"] = "CloudSaverTagManager"
-	// atClaims["jti"] = uuid.NewString()
-	// atClaims["iat"] = currentTime.Unix()
-	// atClaims["nbf"] = currentTime.Unix()
-	// atClaims["exp"] = currentTime.Add(time.Second * 259200).Unix() // 1d=86400
-	// atClaims["sub"] = "userid1"
-	// atClaims["tm_companyid"] = "MSP-5aa311904d5d6"
-	// atClaims["tm_aws"] = []map[string]string{
-	// 	{
-	// 		"accountId":  "_120802311370_1",
-	// 		"externalId": "323676f1-e768-49f1-ad59-24e0c8886177",
-	// 	},
-	// }
-
-	// at := jwtv5.NewWithClaims(jwtv5.SigningMethodRS256, atClaims)
-	// token, err := at.SignedString(prvKey)
-	// if err != nil {
-	// 	logger.Errorf("SignedString failed: %v", err)
-	// 	return
-	// }
-
-	// logger.Info(token)
-
 	defer l.Close()
 	auth := &internal.Auth{
 		AndroidClientId: config.AndroidClientId,

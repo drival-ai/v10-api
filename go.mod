@@ -6,6 +6,7 @@ require (
 	github.com/drival-ai/v10-go v0.1.3
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/golang/glog v1.2.4
+	github.com/google/uuid v1.6.0
 	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
 	github.com/jackc/pgx/v5 v5.7.2
 	google.golang.org/api v0.227.0
