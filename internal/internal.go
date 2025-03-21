@@ -3,6 +3,7 @@ package internal
 import (
 	"context"
 	"crypto/tls"
+	"fmt"
 	"regexp"
 	"strings"
 	"time"
@@ -10,6 +11,7 @@ import (
 	"github.com/drival-ai/v10-api/global"
 	jwtv5 "github.com/golang-jwt/jwt/v5"
 	"github.com/golang/glog"
+	"github.com/jackc/pgx/v5"
 	"google.golang.org/api/idtoken"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -79,12 +81,11 @@ func (a *Auth) verifyCaller(ctx context.Context, md metadata.MD) (UserInfo, erro
 	}
 
 	claims := jwtv5.MapClaims{}
-	t, err := jwtv5.ParseWithClaims(token, &claims, func(tk *jwtv5.Token) (any, error) {
+	tk, err := jwtv5.ParseWithClaims(token, &claims, func(tk *jwtv5.Token) (any, error) {
 		return key, nil
 	})
 
-	_ = t
-
+	_ = tk
 	glog.Infof("claims=%v", claims)
 
 	// payload, err := idtoken.Validate(ctx, token, a.AndroidClientId)
@@ -107,10 +108,10 @@ func (a *Auth) verifyCaller(ctx context.Context, md metadata.MD) (UserInfo, erro
 	// 	return UserInfo{}, UnauthorizedCallerErr
 	// }
 
-	// var email string
-	// if v, ok := payload.Claims["email"]; ok {
-	// 	email = fmt.Sprintf("%v", v)
-	// }
+	var sub string
+	if v, ok := claims["sub"]; ok {
+		sub = fmt.Sprintf("%v", v)
+	}
 
 	// var validEmail bool
 	// for _, allow := range allowed {
@@ -124,18 +125,25 @@ func (a *Auth) verifyCaller(ctx context.Context, md metadata.MD) (UserInfo, erro
 	// 	return UserInfo{}, UnauthorizedCallerErr
 	// }
 
-	// var found bool
-	// var qId string
-	// var q strings.Builder
-	// fmt.Fprintf(&q, "select id from users ")
-	// fmt.Fprintf(&q, "where id = $1 ")
-	// rows, _ := global.PgxPool.Query(ctx, q.String(), sub)
-	// pgx.ForEachRow(rows, []any{&qId}, func() error {
-	// 	found = true
-	// 	return nil
-	// })
+	var found bool
+	var email, name string
+	var q strings.Builder
+	fmt.Fprintf(&q, "select email, name from users ")
+	fmt.Fprintf(&q, "where id = $1 ")
+	rows, _ := global.PgxPool.Query(ctx, q.String(), sub)
+	pgx.ForEachRow(rows, []any{&email, &name}, func() error {
+		found = true
+		return nil
+	})
 
-	return UserInfo{Email: ""}, nil
+	if !found {
+		glog.Errorf("id %v not found", sub)
+		return UserInfo{}, fmt.Errorf("not found")
+	}
+
+	glog.Infof("id=%v, email=%v, name=%v", sub, email, name)
+
+	return UserInfo{Id: sub, Email: email, Name: name}, nil
 }
 
 func (a *Auth) UnaryInterceptor(ctx context.Context, req any, info *grpc.UnaryServerInfo, h grpc.UnaryHandler) (any, error) {
