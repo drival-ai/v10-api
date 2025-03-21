@@ -7,10 +7,12 @@ import (
 	"github.com/drival-ai/v10-api/global"
 	"github.com/drival-ai/v10-api/internal"
 	iampb "github.com/drival-ai/v10-go/iam/v1"
+	"github.com/golang/glog"
 
 	b "github.com/drival-ai/v10-api/services/base"
 	iam "github.com/drival-ai/v10-api/services/iam"
 	base "github.com/drival-ai/v10-go/base/v1"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -41,6 +43,8 @@ func (s *service) Login(ctx context.Context, req *iampb.LoginRequest) (*iampb.Lo
 }
 
 func (s *service) WhoAmI(ctx context.Context, req *iampb.WhoAmIRequest) (*iampb.WhoAmIResponse, error) {
+	md, _ := metadata.FromIncomingContext(ctx)
+	glog.Infof("md=%v", md)
 	config := iam.Config{UserInfo: s.UserInfo, Config: s.Config, PrivateKey: s.PrivateKey}
 	return iam.New(&config).WhoAmI(ctx, req)
 }

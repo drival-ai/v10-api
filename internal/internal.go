@@ -211,7 +211,9 @@ func (a *Auth) StreamInterceptor(srv any, stream grpc.ServerStream, info *grpc.S
 			return UnauthorizedCallerErr
 		}
 
+		nctx = context.WithValue(nctx, CtxKeyId, u.Id)
 		nctx = context.WithValue(nctx, CtxKeyEmail, u.Email)
+		nctx = context.WithValue(nctx, CtxKeyName, u.Name)
 	}
 
 	wrap.SetContext(nctx)
