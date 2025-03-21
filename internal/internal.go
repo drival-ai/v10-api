@@ -3,12 +3,12 @@ package internal
 import (
 	"context"
 	"crypto/tls"
-	"encoding/json"
-	"fmt"
 	"regexp"
 	"strings"
 	"time"
 
+	"github.com/drival-ai/v10-api/global"
+	jwtv5 "github.com/golang-jwt/jwt/v5"
 	"github.com/golang/glog"
 	"google.golang.org/api/idtoken"
 	"google.golang.org/grpc"
@@ -39,11 +39,20 @@ var (
 )
 
 type UserInfo struct {
+	Id    string
 	Email string
+	Name  string
 }
 
 type Auth struct {
 	AndroidClientId string // audience for token validation (Android)
+}
+
+// WrapperClaims represents data extracted from JWT
+type WrapperClaims struct {
+	jwtv5.MapClaims
+	Data  map[string]interface{}
+	Roles []string
 }
 
 func (a *Auth) verifyCaller(ctx context.Context, md metadata.MD) (UserInfo, error) {
@@ -63,44 +72,70 @@ func (a *Auth) verifyCaller(ctx context.Context, md metadata.MD) (UserInfo, erro
 		return UserInfo{}, UnauthorizedCallerErr
 	}
 
-	payload, err := idtoken.Validate(ctx, token, a.AndroidClientId)
+	key, err := jwtv5.ParseRSAPublicKeyFromPEM([]byte(global.AuthPublicKey))
 	if err != nil {
-		glog.Errorf("Validate failed: %v", err)
-		return UserInfo{}, err
-	}
-
-	b, _ := json.Marshal(payload)
-	glog.Infof("payload=%v", string(b))
-	glog.Infof("claims=%v", payload.Claims)
-
-	var emailVerified bool
-	if v, ok := payload.Claims["email_verified"]; ok {
-		emailVerified = v.(bool)
-	}
-
-	if !emailVerified {
-		glog.Errorf("failed: email not verified")
+		glog.Errorf("ParseRSAPublicKeyFromPEM failed: %v", err)
 		return UserInfo{}, UnauthorizedCallerErr
 	}
 
-	var email string
-	if v, ok := payload.Claims["email"]; ok {
-		email = fmt.Sprintf("%v", v)
-	}
+	claims := jwtv5.MapClaims{}
+	t, err := jwtv5.ParseWithClaims(token, &claims, func(tk *jwtv5.Token) (any, error) {
+		return key, nil
+	})
 
-	var validEmail bool
-	for _, allow := range allowed {
-		if strings.HasSuffix(email, allow) {
-			validEmail = validEmail || true
-		}
-	}
+	_ = t
 
-	if !validEmail {
-		glog.Errorf("failed: invalid email")
-		return UserInfo{}, UnauthorizedCallerErr
-	}
+	glog.Infof("claims=%v", claims)
 
-	return UserInfo{Email: email}, nil
+	// payload, err := idtoken.Validate(ctx, token, a.AndroidClientId)
+	// if err != nil {
+	// 	glog.Errorf("Validate failed: %v", err)
+	// 	return UserInfo{}, err
+	// }
+
+	// b, _ := json.Marshal(payload)
+	// glog.Infof("payload=%v", string(b))
+	// glog.Infof("claims=%v", payload.Claims)
+
+	// var emailVerified bool
+	// if v, ok := payload.Claims["email_verified"]; ok {
+	// 	emailVerified = v.(bool)
+	// }
+
+	// if !emailVerified {
+	// 	glog.Errorf("failed: email not verified")
+	// 	return UserInfo{}, UnauthorizedCallerErr
+	// }
+
+	// var email string
+	// if v, ok := payload.Claims["email"]; ok {
+	// 	email = fmt.Sprintf("%v", v)
+	// }
+
+	// var validEmail bool
+	// for _, allow := range allowed {
+	// 	if strings.HasSuffix(email, allow) {
+	// 		validEmail = validEmail || true
+	// 	}
+	// }
+
+	// if !validEmail {
+	// 	glog.Errorf("failed: invalid email")
+	// 	return UserInfo{}, UnauthorizedCallerErr
+	// }
+
+	// var found bool
+	// var qId string
+	// var q strings.Builder
+	// fmt.Fprintf(&q, "select id from users ")
+	// fmt.Fprintf(&q, "where id = $1 ")
+	// rows, _ := global.PgxPool.Query(ctx, q.String(), sub)
+	// pgx.ForEachRow(rows, []any{&qId}, func() error {
+	// 	found = true
+	// 	return nil
+	// })
+
+	return UserInfo{Email: ""}, nil
 }
 
 func (a *Auth) UnaryInterceptor(ctx context.Context, req any, info *grpc.UnaryServerInfo, h grpc.UnaryHandler) (any, error) {
