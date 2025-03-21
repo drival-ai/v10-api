@@ -1,5 +1,8 @@
 #!/bin/sh
 
+exec 100>/tmp/api.lock || exit 1
+flock -w 10 100 || exit 1
+
 VERSION=$(curl -s https://api.github.com/repos/drival-ai/v10-api/releases/latest | jq -r ".tag_name")
 cd /tmp/ && wget https://github.com/drival-ai/v10-api/releases/download/$VERSION/v10-api-$VERSION-x86_64-linux.tar.gz
 tar xvzf v10-api-$VERSION-x86_64-linux.tar.gz
