@@ -43,8 +43,12 @@ func (s *service) Login(ctx context.Context, req *iampb.LoginRequest) (*iampb.Lo
 }
 
 func (s *service) WhoAmI(ctx context.Context, req *iampb.WhoAmIRequest) (*iampb.WhoAmIResponse, error) {
-	md, _ := metadata.FromIncomingContext(ctx)
-	glog.Infof("md=%v", md)
+	id := metadata.ValueFromIncomingContext(ctx, internal.CtxKeyId)
+	email := metadata.ValueFromIncomingContext(ctx, internal.CtxKeyEmail)
+	name := metadata.ValueFromIncomingContext(ctx, internal.CtxKeyName)
+
+	glog.Infof("id=%v, email=%v, name=%v", id, email, name)
+
 	config := iam.Config{UserInfo: s.UserInfo, Config: s.Config, PrivateKey: s.PrivateKey}
 	return iam.New(&config).WhoAmI(ctx, req)
 }

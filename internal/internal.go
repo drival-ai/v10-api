@@ -144,8 +144,6 @@ func (a *Auth) verifyCaller(ctx context.Context, md metadata.MD) (UserInfo, erro
 		return UserInfo{}, fmt.Errorf("not found")
 	}
 
-	glog.Infof("id=%v, email=%v, name=%v", sub, email, name)
-
 	return UserInfo{Id: sub, Email: email, Name: name}, nil
 }
 
