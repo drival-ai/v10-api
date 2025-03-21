@@ -8,9 +8,9 @@ import (
 	"github.com/drival-ai/v10-api/internal"
 	iampb "github.com/drival-ai/v10-go/iam/v1"
 
-	b "github.com/drival-ai/v10-api/services/base"
+	base "github.com/drival-ai/v10-api/services/base"
 	iam "github.com/drival-ai/v10-api/services/iam"
-	base "github.com/drival-ai/v10-go/base/v1"
+	basepb "github.com/drival-ai/v10-go/base/v1"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -26,7 +26,7 @@ type service struct {
 	PrivateKey *rsa.PrivateKey
 
 	iampb.UnimplementedIamServer
-	base.UnimplementedV10Server
+	basepb.UnimplementedV10Server
 }
 
 func (s *service) Register(ctx context.Context, req *iampb.RegisterRequest) (*iampb.RegisterResponse, error) {
@@ -56,6 +56,19 @@ func (s *service) WhoAmI(ctx context.Context, req *iampb.WhoAmIRequest) (*iampb.
 	return iam.New(&config).WhoAmI(ctx, req)
 }
 
-func (s *service) RegisterVehicle(ctx context.Context, req *base.RegisterVehicleRequest) (*emptypb.Empty, error) {
-	return b.New().RegisterVehicle(ctx, req)
+func (s *service) RegisterVehicle(ctx context.Context, req *basepb.RegisterVehicleRequest) (*emptypb.Empty, error) {
+	id := ctx.Value(internal.CtxKeyId)
+	email := ctx.Value(internal.CtxKeyEmail)
+	name := ctx.Value(internal.CtxKeyName)
+	config := base.Config{
+		UserInfo: internal.UserInfo{
+			Id:    id.(string),
+			Email: email.(string),
+			Name:  name.(string),
+		},
+		Config:     s.Config,
+		PrivateKey: s.PrivateKey,
+	}
+
+	return base.New((*base.Config)(&config)).RegisterVehicle(ctx, req)
 }
