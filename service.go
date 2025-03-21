@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"crypto/rsa"
 
 	"github.com/drival-ai/v10-api/global"
 	"github.com/drival-ai/v10-api/internal"
@@ -20,9 +21,10 @@ var (
 )
 
 type service struct {
-	ctx      context.Context
-	UserInfo internal.UserInfo
-	Config   *global.Config
+	ctx        context.Context
+	UserInfo   internal.UserInfo
+	Config     *global.Config
+	PrivateKey *rsa.PrivateKey
 
 	iampb.UnimplementedIamServer
 	base.UnimplementedV10Server

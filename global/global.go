@@ -1,6 +1,10 @@
 package global
 
 import (
+	"crypto/rsa"
+	"crypto/x509"
+	"encoding/pem"
+
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -23,4 +27,15 @@ var (
 type Config struct {
 	AndroidClientId string `yaml:"android-client-id"` // used for audience
 	PgDsn           string `yaml:"pg-dsn"`
+}
+
+func LoadPublicKey() (*rsa.PublicKey, error) {
+	data, _ := pem.Decode([]byte(AuthPublicKey))
+	pub, err := x509.ParsePKIXPublicKey(data.Bytes)
+	if err != nil {
+		return nil, err
+	}
+
+	pubk := pub.(*rsa.PublicKey)
+	return pubk, err
 }
