@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"sync"
 
 	"github.com/drival-ai/v10-api/global"
 	"github.com/drival-ai/v10-api/internal"
@@ -21,10 +20,9 @@ var (
 )
 
 type service struct {
-	ctx        context.Context
-	clientOnce sync.Once
-	UserInfo   internal.UserInfo
-	Config     *global.Config
+	ctx      context.Context
+	UserInfo internal.UserInfo
+	Config   *global.Config
 
 	iampb.UnimplementedIamServer
 	base.UnimplementedV10Server
