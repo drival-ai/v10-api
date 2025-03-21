@@ -12,7 +12,6 @@ import (
 	b "github.com/drival-ai/v10-api/services/base"
 	iam "github.com/drival-ai/v10-api/services/iam"
 	base "github.com/drival-ai/v10-go/base/v1"
-	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -43,9 +42,9 @@ func (s *service) Login(ctx context.Context, req *iampb.LoginRequest) (*iampb.Lo
 }
 
 func (s *service) WhoAmI(ctx context.Context, req *iampb.WhoAmIRequest) (*iampb.WhoAmIResponse, error) {
-	id := metadata.ValueFromIncomingContext(ctx, internal.CtxKeyId)
-	email := metadata.ValueFromIncomingContext(ctx, internal.CtxKeyEmail)
-	name := metadata.ValueFromIncomingContext(ctx, internal.CtxKeyName)
+	id := ctx.Value(internal.CtxKeyId)
+	email := ctx.Value(internal.CtxKeyEmail)
+	name := ctx.Value(internal.CtxKeyName)
 
 	glog.Infof("id=%v, email=%v, name=%v", id, email, name)
 
