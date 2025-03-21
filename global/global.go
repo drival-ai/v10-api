@@ -9,5 +9,6 @@ var (
 )
 
 type Config struct {
-	PgDsn string `yaml:"pgdsn"`
+	AndroidClientId string `yaml:"android-client-id"` // used for audience
+	PgDsn           string `yaml:"pg-dsn"`
 }
