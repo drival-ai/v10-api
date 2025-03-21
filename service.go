@@ -6,12 +6,11 @@ import (
 
 	"github.com/drival-ai/v10-api/global"
 	"github.com/drival-ai/v10-api/internal"
-	"github.com/drival-ai/v10-go/iam/v1"
+	iampb "github.com/drival-ai/v10-go/iam/v1"
 
 	b "github.com/drival-ai/v10-api/services/base"
+	iam "github.com/drival-ai/v10-api/services/iam"
 	base "github.com/drival-ai/v10-go/base/v1"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -27,20 +26,20 @@ type service struct {
 	UserInfo   internal.UserInfo
 	Config     *global.Config
 
-	iam.UnimplementedIamServer
+	iampb.UnimplementedIamServer
 	base.UnimplementedV10Server
 }
 
-func (s *service) Register(ctx context.Context, req *iam.RegisterRequest) (*iam.RegisterResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Register not implemented")
+func (s *service) Register(ctx context.Context, req *iampb.RegisterRequest) (*iampb.RegisterResponse, error) {
+	return iam.New().Register(ctx, req)
 }
 
-func (s *service) Login(ctx context.Context, req *iam.LoginRequest) (*iam.LoginResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
+func (s *service) Login(ctx context.Context, req *iampb.LoginRequest) (*iampb.LoginResponse, error) {
+	return iam.New().Login(ctx, req)
 }
 
-func (s *service) WhoAmI(ctx context.Context, req *iam.WhoAmIRequest) (*iam.WhoAmIResponse, error) {
-	return &iam.WhoAmIResponse{Name: "V10 MVP"}, nil
+func (s *service) WhoAmI(ctx context.Context, req *iampb.WhoAmIRequest) (*iampb.WhoAmIResponse, error) {
+	return iam.New().WhoAmI(ctx, req)
 }
 
 func (s *service) RegisterVehicle(ctx context.Context, req *base.RegisterVehicleRequest) (*emptypb.Empty, error) {
