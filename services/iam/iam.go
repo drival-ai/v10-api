@@ -91,6 +91,12 @@ func (s *svc) Login(ctx context.Context, req *iam.LoginRequest) (*iam.LoginRespo
 		glog.Infof("givenName=%v", givenName)
 	}
 
+	var fullName string
+	if v, ok := payload.Claims["name"]; ok {
+		fullName = fmt.Sprintf("%v", v)
+		glog.Infof("fullName=%v", fullName)
+	}
+
 	// TODO: Save these info to users table.
 
 	currentTime := time.Now().UTC()
@@ -108,6 +114,8 @@ func (s *svc) Login(ctx context.Context, req *iam.LoginRequest) (*iam.LoginRespo
 		glog.Errorf("SignedString failed: %v", err)
 		return nil, internal.UnauthorizedCallerErr
 	}
+
+	glog.Infof("token=%v", token)
 
 	return &iam.LoginResponse{AccessToken: token}, nil
 }
