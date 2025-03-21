@@ -74,7 +74,11 @@ func main() {
 
 	defer ccon.Close()
 	client := iam.NewIamClient(ccon)
-	out, err := client.WhoAmI(ctx, &iam.WhoAmIRequest{})
+
+	out, err := client.Login(ctx, &iam.LoginRequest{
+		Token: "sample-token-here",
+	})
+
 	b, _ := json.Marshal(out)
 	slog.Info(string(b))
 }
