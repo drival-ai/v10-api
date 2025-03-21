@@ -55,7 +55,7 @@ func run(ctx context.Context, network, port string, done chan error) error {
 
 	defer l.Close()
 	auth := &internal.Auth{
-		Audience: "https://",
+		AndroidClientId: config.AndroidClientId,
 	}
 
 	// Setup our grpc server.

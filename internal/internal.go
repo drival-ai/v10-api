@@ -36,7 +36,7 @@ type UserInfo struct {
 }
 
 type Auth struct {
-	Audience string // audience for token validation
+	AndroidClientId string // audience for token validation (Android)
 }
 
 func (a *Auth) verifyCaller(ctx context.Context, md metadata.MD) (UserInfo, error) {
@@ -56,7 +56,7 @@ func (a *Auth) verifyCaller(ctx context.Context, md metadata.MD) (UserInfo, erro
 		return UserInfo{}, unauthorizedCallerErr
 	}
 
-	payload, err := idtoken.Validate(ctx, token, a.Audience)
+	payload, err := idtoken.Validate(ctx, token, a.AndroidClientId)
 	if err != nil {
 		glog.Errorf("Validate failed: %v", err)
 		return UserInfo{}, err
