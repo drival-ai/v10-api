@@ -108,18 +108,6 @@ func (a *Auth) verifyCaller(ctx context.Context, md metadata.MD) (UserInfo, erro
 		sub = fmt.Sprintf("%v", v)
 	}
 
-	// var validEmail bool
-	// for _, allow := range allowed {
-	// 	if strings.HasSuffix(email, allow) {
-	// 		validEmail = validEmail || true
-	// 	}
-	// }
-
-	// if !validEmail {
-	// 	glog.Errorf("failed: invalid email")
-	// 	return UserInfo{}, UnauthorizedCallerErr
-	// }
-
 	var found bool
 	var email, name string
 	var q strings.Builder
@@ -161,6 +149,7 @@ func (a *Auth) UnaryInterceptor(ctx context.Context, req any, info *grpc.UnarySe
 		if err != nil {
 			return nil, UnauthorizedCallerErr
 		}
+
 		glog.Infof("user=%v", u)
 		nctx = context.WithValue(nctx, CtxKeyId, u.Id)
 		nctx = context.WithValue(nctx, CtxKeyEmail, u.Email)
