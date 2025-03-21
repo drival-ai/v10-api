@@ -7,7 +7,6 @@ import (
 	"github.com/drival-ai/v10-api/global"
 	"github.com/drival-ai/v10-api/internal"
 	iampb "github.com/drival-ai/v10-go/iam/v1"
-	"github.com/golang/glog"
 
 	b "github.com/drival-ai/v10-api/services/base"
 	iam "github.com/drival-ai/v10-api/services/iam"
@@ -23,7 +22,6 @@ var (
 
 type service struct {
 	ctx        context.Context
-	UserInfo   internal.UserInfo
 	Config     *global.Config
 	PrivateKey *rsa.PrivateKey
 
@@ -32,12 +30,12 @@ type service struct {
 }
 
 func (s *service) Register(ctx context.Context, req *iampb.RegisterRequest) (*iampb.RegisterResponse, error) {
-	config := iam.Config{UserInfo: s.UserInfo, Config: s.Config, PrivateKey: s.PrivateKey}
+	config := iam.Config{Config: s.Config, PrivateKey: s.PrivateKey}
 	return iam.New(&config).Register(ctx, req)
 }
 
 func (s *service) Login(ctx context.Context, req *iampb.LoginRequest) (*iampb.LoginResponse, error) {
-	config := iam.Config{UserInfo: s.UserInfo, Config: s.Config, PrivateKey: s.PrivateKey}
+	config := iam.Config{Config: s.Config, PrivateKey: s.PrivateKey}
 	return iam.New(&config).Login(ctx, req)
 }
 
@@ -45,10 +43,16 @@ func (s *service) WhoAmI(ctx context.Context, req *iampb.WhoAmIRequest) (*iampb.
 	id := ctx.Value(internal.CtxKeyId)
 	email := ctx.Value(internal.CtxKeyEmail)
 	name := ctx.Value(internal.CtxKeyName)
+	config := iam.Config{
+		UserInfo: internal.UserInfo{
+			Id:    id.(string),
+			Email: email.(string),
+			Name:  name.(string),
+		},
+		Config:     s.Config,
+		PrivateKey: s.PrivateKey,
+	}
 
-	glog.Infof("id=%v, email=%v, name=%v", id, email, name)
-
-	config := iam.Config{UserInfo: s.UserInfo, Config: s.Config, PrivateKey: s.PrivateKey}
 	return iam.New(&config).WhoAmI(ctx, req)
 }
 
