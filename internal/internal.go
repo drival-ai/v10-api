@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	"regexp"
 	"strings"
 	"time"
 
@@ -28,6 +29,11 @@ var (
 	allowed = []string{
 		"@labs-169405.iam.gserviceaccount.com",  // dev
 		"@mobingi-main.iam.gserviceaccount.com", // next, prod
+	}
+
+	reBypassMethods = []string{
+		`.*iam.v[0-9]*.Iam/Login.*`,
+		`.*iam.v[0-9]*.Iam/Register.*`,
 	}
 )
 
@@ -102,14 +108,18 @@ func (a *Auth) UnaryInterceptor(ctx context.Context, req any, info *grpc.UnarySe
 	}(time.Now())
 
 	glog.Infof("[unary] >> %v", info.FullMethod)
+
 	md, _ := metadata.FromIncomingContext(ctx)
-	u, err := a.verifyCaller(ctx, md)
-	if err != nil {
-		return nil, unauthorizedCallerErr
+	nctx := metadata.NewIncomingContext(ctx, md)
+	if !shouldBypassMethod(info.FullMethod) {
+		u, err := a.verifyCaller(ctx, md)
+		if err != nil {
+			return nil, unauthorizedCallerErr
+		}
+
+		nctx = context.WithValue(nctx, CtxKeyEmail, u.Email)
 	}
 
-	nctx := metadata.NewIncomingContext(ctx, md)
-	nctx = context.WithValue(nctx, CtxKeyEmail, u.Email)
 	nctx = context.WithValue(nctx, CtxKeyFullMethod, info.FullMethod)
 	return h(nctx, req)
 }
@@ -144,14 +154,17 @@ func (a *Auth) StreamInterceptor(srv any, stream grpc.ServerStream, info *grpc.S
 
 	glog.Infof("[stream] >> %v", info.FullMethod)
 	md, _ := metadata.FromIncomingContext(stream.Context())
-	u, err := a.verifyCaller(stream.Context(), md)
-	if err != nil {
-		return unauthorizedCallerErr
+	wrap := newStreamContextWrapper(stream)
+	nctx := context.WithValue(wrap.Context(), CtxKeyFullMethod, info.FullMethod)
+	if !shouldBypassMethod(info.FullMethod) {
+		u, err := a.verifyCaller(stream.Context(), md)
+		if err != nil {
+			return unauthorizedCallerErr
+		}
+
+		nctx = context.WithValue(nctx, CtxKeyEmail, u.Email)
 	}
 
-	wrap := newStreamContextWrapper(stream)
-	nctx := context.WithValue(wrap.Context(), CtxKeyEmail, u.Email)
-	nctx = context.WithValue(nctx, CtxKeyFullMethod, info.FullMethod)
 	wrap.SetContext(nctx)
 	return h(srv, wrap)
 }
@@ -195,4 +208,17 @@ func GetInternalConn(ctx context.Context, host string) (*grpc.ClientConn, error)
 	}
 
 	return con, nil
+}
+
+func shouldBypassMethod(method string) bool {
+	var skip bool
+	for _, v := range reBypassMethods {
+		re := regexp.MustCompile(v)
+		skip = skip || re.MatchString(method)
+		if skip {
+			break
+		}
+	}
+
+	return skip
 }
