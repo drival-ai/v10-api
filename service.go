@@ -31,12 +31,12 @@ type service struct {
 }
 
 func (s *service) Register(ctx context.Context, req *iampb.RegisterRequest) (*iampb.RegisterResponse, error) {
-	config := iam.Config{UserInfo: s.UserInfo, Config: s.Config}
+	config := iam.Config{UserInfo: s.UserInfo, Config: s.Config, PrivateKey: s.PrivateKey}
 	return iam.New(&config).Register(ctx, req)
 }
 
 func (s *service) Login(ctx context.Context, req *iampb.LoginRequest) (*iampb.LoginResponse, error) {
-	config := iam.Config{UserInfo: s.UserInfo, Config: s.Config}
+	config := iam.Config{UserInfo: s.UserInfo, Config: s.Config, PrivateKey: s.PrivateKey}
 	return iam.New(&config).Login(ctx, req)
 }
 

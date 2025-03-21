@@ -57,6 +57,18 @@ func (s *svc) Login(ctx context.Context, req *iam.LoginRequest) (*iam.LoginRespo
 	glog.Infof("payload=%v", string(b))
 	glog.Infof("claims=%v", payload.Claims)
 
+	var sub string
+	if v, ok := payload.Claims["sub"]; ok {
+		sub = fmt.Sprintf("%v", v)
+		glog.Infof("sub=%v", sub)
+	}
+
+	var email string
+	if v, ok := payload.Claims["email"]; ok {
+		email = fmt.Sprintf("%v", v)
+		glog.Infof("email=%v", email)
+	}
+
 	var emailVerified bool
 	if v, ok := payload.Claims["email_verified"]; ok {
 		emailVerified = v.(bool)
@@ -67,16 +79,16 @@ func (s *svc) Login(ctx context.Context, req *iam.LoginRequest) (*iam.LoginRespo
 		return nil, internal.UnauthorizedCallerErr
 	}
 
-	var email string
-	if v, ok := payload.Claims["email"]; ok {
-		email = fmt.Sprintf("%v", v)
-		glog.Infof("email=%v", email)
+	var familyName string
+	if v, ok := payload.Claims["family_name"]; ok {
+		familyName = fmt.Sprintf("%v", v)
+		glog.Infof("familyName=%v", familyName)
 	}
 
-	var sub string
-	if v, ok := payload.Claims["sub"]; ok {
-		sub = fmt.Sprintf("%v", v)
-		glog.Infof("sub=%v", sub)
+	var givenName string
+	if v, ok := payload.Claims["given_name"]; ok {
+		givenName = fmt.Sprintf("%v", v)
+		glog.Infof("givenName=%v", givenName)
 	}
 
 	// TODO: Save these info to users table.
