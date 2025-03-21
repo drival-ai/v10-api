@@ -31,8 +31,12 @@ type service struct {
 	base.UnimplementedV10Server
 }
 
-func (s *service) Login(req *iam.LoginRequest, stream iam.Iam_LoginServer) error {
-	return status.Errorf(codes.Unimplemented, "method Login not implemented")
+func (s *service) Register(ctx context.Context, req *iam.RegisterRequest) (*iam.RegisterResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Register not implemented")
+}
+
+func (s *service) Login(ctx context.Context, req *iam.LoginRequest) (*iam.LoginResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
 }
 
 func (s *service) WhoAmI(ctx context.Context, req *iam.WhoAmIRequest) (*iam.WhoAmIResponse, error) {
