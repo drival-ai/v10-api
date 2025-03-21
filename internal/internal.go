@@ -21,7 +21,9 @@ import (
 )
 
 const (
+	CtxKeyId         = "id"
 	CtxKeyEmail      = "email"
+	CtxKeyName       = "name"
 	CtxKeyFullMethod = "fullMethod"
 )
 
@@ -48,13 +50,6 @@ type UserInfo struct {
 
 type Auth struct {
 	AndroidClientId string // audience for token validation (Android)
-}
-
-// WrapperClaims represents data extracted from JWT
-type WrapperClaims struct {
-	jwtv5.MapClaims
-	Data  map[string]interface{}
-	Roles []string
 }
 
 func (a *Auth) verifyCaller(ctx context.Context, md metadata.MD) (UserInfo, error) {
@@ -128,13 +123,21 @@ func (a *Auth) verifyCaller(ctx context.Context, md metadata.MD) (UserInfo, erro
 	var found bool
 	var email, name string
 	var q strings.Builder
-	fmt.Fprintf(&q, "select email, name from users ")
+	fmt.Fprintf(&q, "select email, full_name from users ")
 	fmt.Fprintf(&q, "where id = $1 ")
-	rows, _ := global.PgxPool.Query(ctx, q.String(), sub)
-	pgx.ForEachRow(rows, []any{&email, &name}, func() error {
+	rows, err := global.PgxPool.Query(ctx, q.String(), sub)
+	if err != nil {
+		glog.Errorf("[dbg] Query failed: %v", err)
+	}
+
+	_, err = pgx.ForEachRow(rows, []any{&email, &name}, func() error {
 		found = true
 		return nil
 	})
+
+	if err != nil {
+		glog.Errorf("[dbg] ForEachRow failed: %v", err)
+	}
 
 	if !found {
 		glog.Errorf("id %v not found", sub)
@@ -161,6 +164,7 @@ func (a *Auth) UnaryInterceptor(ctx context.Context, req any, info *grpc.UnarySe
 			return nil, UnauthorizedCallerErr
 		}
 
+		nctx = context.WithValue(nctx, CtxKeyId, u.Id)
 		nctx = context.WithValue(nctx, CtxKeyEmail, u.Email)
 	}
 
