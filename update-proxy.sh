@@ -1,7 +1,7 @@
 #!/bin/sh
 
 exec 200>/tmp/proxy.lock || exit 1
-flock -w 10 100 || exit 1
+flock -w 10 200 || exit 1
 trap 'rm -f /tmp/proxy.lock' EXIT
 
 PROXY_VERSION=$(curl -s https://api.github.com/repos/drival-ai/v10-api-proxy/releases/latest | jq -r ".tag_name")
