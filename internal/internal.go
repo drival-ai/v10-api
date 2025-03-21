@@ -166,6 +166,7 @@ func (a *Auth) UnaryInterceptor(ctx context.Context, req any, info *grpc.UnarySe
 
 		nctx = context.WithValue(nctx, CtxKeyId, u.Id)
 		nctx = context.WithValue(nctx, CtxKeyEmail, u.Email)
+		nctx = context.WithValue(nctx, CtxKeyName, u.Name)
 	}
 
 	nctx = context.WithValue(nctx, CtxKeyFullMethod, info.FullMethod)
