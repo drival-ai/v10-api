@@ -23,6 +23,7 @@ type svc struct {
 	Config *Config
 }
 
+// NOTE: Skipped by internal interceptor. Verify by ourselves.
 func (s *svc) Register(ctx context.Context, req *iam.RegisterRequest) (*iam.RegisterResponse, error) {
 	if req == nil {
 		return nil, internal.UnauthorizedCallerErr
@@ -62,6 +63,7 @@ func (s *svc) Register(ctx context.Context, req *iam.RegisterRequest) (*iam.Regi
 	return nil, status.Errorf(codes.Unimplemented, "method Register not implemented")
 }
 
+// NOTE: Skipped by internal interceptor. Verify by ourselves.
 func (s *svc) Login(ctx context.Context, req *iam.LoginRequest) (*iam.LoginResponse, error) {
 	if req == nil {
 		return nil, internal.UnauthorizedCallerErr
