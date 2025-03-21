@@ -28,9 +28,6 @@ type svc struct {
 	Config *Config
 }
 
-// payload={"iss":"https://accounts.google.com","aud":"1097225870985-eh9jdo7fecta4vfsgc98qcqu2kd63emf.apps.googleusercontent.com","exp":1742543624,"iat":1742540024,"sub":"109527378988750624019"}
-// claims=map[aud:1097225870985-eh9jdo7fecta4vfsgc98qcqu2kd63emf.apps.googleusercontent.com azp:1097225870985-ka31pcsi8618t9sl3lseqhvs8eo85l6d.apps.googleusercontent.com email:wewpeligrino@gmail.com email_verified:true exp:1.742543624e+09 family_name:Fingerstyle given_name:N iat:1.742540024e+09 iss:https://accounts.google.com name:N Fingerstyle picture:https://lh3.googleusercontent.com/a/ACg8ocL8I3YJA-Id1bE8WYu4K1H52L15Xe5fvm1xUtK6Hh0pSE3iHA=s96-c sub:109527378988750624019]
-
 // NOTE: Skipped by internal interceptor. Verify by ourselves.
 func (s *svc) Register(ctx context.Context, req *iam.RegisterRequest) (*iam.RegisterResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Register not implemented")
