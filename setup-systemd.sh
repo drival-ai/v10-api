@@ -16,7 +16,7 @@ chmod +x /etc/v10-api/update-proxy.sh
 aws s3 cp s3://drival-mvp-api/config .
 cp -v config /etc/v10-api/ && rm config
 aws s3 cp s3://drival-mvp-api/drival.pem .
-cp -v drival.pem /etc/v10-api/ && rm drival.pem
+cp -v drival.pem /etc/v10-api/ && chmod 600 /etc/v10-api/drival.pem && rm drival.pem
 
 cat >/usr/lib/systemd/system/v10api.service <<EOL
 [Unit]
