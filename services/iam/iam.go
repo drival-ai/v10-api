@@ -97,6 +97,24 @@ func (s *svc) Login(ctx context.Context, req *iam.LoginRequest) (*iam.LoginRespo
 		glog.Infof("fullName=%v", fullName)
 	}
 
+	var picture string
+	if v, ok := payload.Claims["picture"]; ok {
+		picture = fmt.Sprintf("%v", v)
+		glog.Infof("picture=%v", picture)
+	}
+
+	var aud string
+	if v, ok := payload.Claims["aud"]; ok {
+		aud = fmt.Sprintf("%v", v)
+		glog.Infof("aud=%v", aud)
+	}
+
+	var azp string
+	if v, ok := payload.Claims["azp"]; ok {
+		azp = fmt.Sprintf("%v", v)
+		glog.Infof("azp=%v", azp)
+	}
+
 	// TODO: Save these info to users table.
 
 	currentTime := time.Now().UTC()
