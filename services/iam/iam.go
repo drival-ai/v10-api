@@ -116,16 +116,13 @@ func (s *svc) Login(ctx context.Context, req *iam.LoginRequest) (*iam.LoginRespo
 
 	// See if already registered.
 	var found bool
-	var qId, qEmail string
+	var qId string
 	var q strings.Builder
-	fmt.Fprintf(&q, "select id, email from users ")
+	fmt.Fprintf(&q, "select id from users ")
 	fmt.Fprintf(&q, "where id = $1 ")
 	rows, _ := global.PgxPool.Query(ctx, q.String(), sub)
-	_, err = pgx.ForEachRow(rows, []any{&qId, &qEmail}, func() error {
-		if qId == sub && qEmail == email {
-			found = true
-		}
-
+	pgx.ForEachRow(rows, []any{&qId}, func() error {
+		found = true
 		return nil
 	})
 
