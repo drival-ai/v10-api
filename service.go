@@ -31,15 +31,18 @@ type service struct {
 }
 
 func (s *service) Register(ctx context.Context, req *iampb.RegisterRequest) (*iampb.RegisterResponse, error) {
-	return iam.New().Register(ctx, req)
+	config := iam.Config{UserInfo: s.UserInfo, Config: s.Config}
+	return iam.New(&config).Register(ctx, req)
 }
 
 func (s *service) Login(ctx context.Context, req *iampb.LoginRequest) (*iampb.LoginResponse, error) {
-	return iam.New().Login(ctx, req)
+	config := iam.Config{UserInfo: s.UserInfo, Config: s.Config}
+	return iam.New(&config).Login(ctx, req)
 }
 
 func (s *service) WhoAmI(ctx context.Context, req *iampb.WhoAmIRequest) (*iampb.WhoAmIResponse, error) {
-	return iam.New().WhoAmI(ctx, req)
+	config := iam.Config{UserInfo: s.UserInfo, Config: s.Config}
+	return iam.New(&config).WhoAmI(ctx, req)
 }
 
 func (s *service) RegisterVehicle(ctx context.Context, req *base.RegisterVehicleRequest) (*emptypb.Empty, error) {

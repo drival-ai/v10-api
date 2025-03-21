@@ -24,7 +24,7 @@ const (
 )
 
 var (
-	unauthorizedCallerErr = status.Errorf(codes.Unauthenticated, "Unauthorized caller.")
+	UnauthorizedCallerErr = status.Errorf(codes.Unauthenticated, "Unauthorized caller.")
 
 	allowed = []string{
 		"@labs-169405.iam.gserviceaccount.com",  // dev
@@ -59,7 +59,7 @@ func (a *Auth) verifyCaller(ctx context.Context, md metadata.MD) (UserInfo, erro
 
 	if token == "" {
 		glog.Errorf("failed: unauthorized call")
-		return UserInfo{}, unauthorizedCallerErr
+		return UserInfo{}, UnauthorizedCallerErr
 	}
 
 	payload, err := idtoken.Validate(ctx, token, a.AndroidClientId)
@@ -79,7 +79,7 @@ func (a *Auth) verifyCaller(ctx context.Context, md metadata.MD) (UserInfo, erro
 
 	if !emailVerified {
 		glog.Errorf("failed: email not verified")
-		return UserInfo{}, unauthorizedCallerErr
+		return UserInfo{}, UnauthorizedCallerErr
 	}
 
 	var email string
@@ -96,7 +96,7 @@ func (a *Auth) verifyCaller(ctx context.Context, md metadata.MD) (UserInfo, erro
 
 	if !validEmail {
 		glog.Errorf("failed: invalid email")
-		return UserInfo{}, unauthorizedCallerErr
+		return UserInfo{}, UnauthorizedCallerErr
 	}
 
 	return UserInfo{Email: email}, nil
@@ -114,7 +114,7 @@ func (a *Auth) UnaryInterceptor(ctx context.Context, req any, info *grpc.UnarySe
 	if !shouldBypassMethod(info.FullMethod) {
 		u, err := a.verifyCaller(ctx, md)
 		if err != nil {
-			return nil, unauthorizedCallerErr
+			return nil, UnauthorizedCallerErr
 		}
 
 		nctx = context.WithValue(nctx, CtxKeyEmail, u.Email)
@@ -159,7 +159,7 @@ func (a *Auth) StreamInterceptor(srv any, stream grpc.ServerStream, info *grpc.S
 	if !shouldBypassMethod(info.FullMethod) {
 		u, err := a.verifyCaller(stream.Context(), md)
 		if err != nil {
-			return unauthorizedCallerErr
+			return UnauthorizedCallerErr
 		}
 
 		nctx = context.WithValue(nctx, CtxKeyEmail, u.Email)
