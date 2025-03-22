@@ -59,13 +59,11 @@ func (s *svc) Login(ctx context.Context, req *iam.LoginRequest) (*iam.LoginRespo
 	var sub string
 	if v, ok := payload.Claims["sub"]; ok {
 		sub = fmt.Sprintf("%v", v)
-		glog.Infof("sub=%v", sub)
 	}
 
 	var email string
 	if v, ok := payload.Claims["email"]; ok {
 		email = fmt.Sprintf("%v", v)
-		glog.Infof("email=%v", email)
 	}
 
 	var emailVerified bool
@@ -81,37 +79,31 @@ func (s *svc) Login(ctx context.Context, req *iam.LoginRequest) (*iam.LoginRespo
 	var familyName string
 	if v, ok := payload.Claims["family_name"]; ok {
 		familyName = fmt.Sprintf("%v", v)
-		glog.Infof("familyName=%v", familyName)
 	}
 
 	var givenName string
 	if v, ok := payload.Claims["given_name"]; ok {
 		givenName = fmt.Sprintf("%v", v)
-		glog.Infof("givenName=%v", givenName)
 	}
 
 	var fullName string
 	if v, ok := payload.Claims["name"]; ok {
 		fullName = fmt.Sprintf("%v", v)
-		glog.Infof("fullName=%v", fullName)
 	}
 
 	var picture string
 	if v, ok := payload.Claims["picture"]; ok {
 		picture = fmt.Sprintf("%v", v)
-		glog.Infof("picture=%v", picture)
 	}
 
 	var aud string
 	if v, ok := payload.Claims["aud"]; ok {
 		aud = fmt.Sprintf("%v", v)
-		glog.Infof("aud=%v", aud)
 	}
 
 	var azp string
 	if v, ok := payload.Claims["azp"]; ok {
 		azp = fmt.Sprintf("%v", v)
-		glog.Infof("azp=%v", azp)
 	}
 
 	// See if already registered.
@@ -167,8 +159,6 @@ func (s *svc) Login(ctx context.Context, req *iam.LoginRequest) (*iam.LoginRespo
 		glog.Errorf("SignedString failed: %v", err)
 		return nil, internal.UnauthorizedCallerErr
 	}
-
-	glog.Infof("token=%v", token)
 
 	return &iam.LoginResponse{AccessToken: token}, nil
 }
