@@ -3,7 +3,6 @@ package iam
 import (
 	"context"
 	"crypto/rsa"
-	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -52,8 +51,6 @@ func (s *svc) Login(ctx context.Context, req *iam.LoginRequest) (*iam.LoginRespo
 		return nil, internal.UnauthorizedCallerErr
 	}
 
-	b, _ := json.Marshal(payload)
-	glog.Infof("payload=%v", string(b))
 	glog.Infof("claims=%v", payload.Claims)
 
 	var sub string
