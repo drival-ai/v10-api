@@ -161,7 +161,11 @@ func (s *svc) Login(ctx context.Context, req *iam.LoginRequest) (*iam.LoginRespo
 }
 
 func (s *svc) WhoAmI(ctx context.Context, req *iam.WhoAmIRequest) (*iam.WhoAmIResponse, error) {
-	return &iam.WhoAmIResponse{Name: "V10 MVP"}, nil
+	return &iam.WhoAmIResponse{
+		Id:    s.Config.UserInfo.Id,
+		Name:  s.Config.UserInfo.Name,
+		Email: s.Config.UserInfo.Email,
+	}, nil
 }
 
 func New(config *Config) *svc { return &svc{Config: config} }
