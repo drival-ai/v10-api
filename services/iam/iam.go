@@ -161,10 +161,22 @@ func (s *svc) Login(ctx context.Context, req *iam.LoginRequest) (*iam.LoginRespo
 }
 
 func (s *svc) WhoAmI(ctx context.Context, req *iam.WhoAmIRequest) (*iam.WhoAmIResponse, error) {
+	var picture string
+	id := s.Config.UserInfo.Id
+	email := s.Config.UserInfo.Email
+	name := s.Config.UserInfo.Name
+	query := `SELECT picture FROM users WHERE id = $1`
+
+	err := global.PgxPool.QueryRow(ctx, query, id).Scan(&picture)
+	if err != nil {
+		return nil, err
+	}
+
 	return &iam.WhoAmIResponse{
-		Id:    s.Config.UserInfo.Id,
-		Name:  s.Config.UserInfo.Name,
-		Email: s.Config.UserInfo.Email,
+		Id:      id,
+		Name:    name,
+		Email:   email,
+		Picture: picture,
 	}, nil
 }
 
