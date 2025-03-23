@@ -3,6 +3,7 @@ package base
 import (
 	"context"
 	"crypto/rsa"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -26,6 +27,16 @@ type Config struct {
 
 type svc struct {
 	Config *Config
+}
+
+type Vehicle struct {
+	Id            sql.NullString
+	ChassisNumber sql.NullString
+	Vin           sql.NullString
+	Make          sql.NullString
+	Model         sql.NullString
+	Year          sql.NullInt64
+	Kilometers    sql.NullInt64
 }
 
 func (s *svc) RegisterVehicle(ctx context.Context, in *base.RegisterVehicleRequest) (*emptypb.Empty, error) {
@@ -99,14 +110,22 @@ func (s *svc) ListVehicles(ctx context.Context, in *base.ListVehiclesRequest) (*
 
 	var vehicles []*base.Vehicle
 	for rows.Next() {
-		var v base.Vehicle
+		var v Vehicle
 		err = rows.Scan(&v.Id, &v.ChassisNumber, &v.Vin,
 			&v.Make, &v.Model, &v.Year, &v.Kilometers)
 		if err != nil {
 			glog.Errorf("Scan failed: %v", err)
 			return nil, internal.InternalErr
 		}
-		vehicles = append(vehicles, &v)
+		vehicles = append(vehicles, &base.Vehicle{
+			Id:            v.Id.String,
+			ChassisNumber: v.ChassisNumber.String,
+			Vin:           v.Vin.String,
+			Make:          v.Make.String,
+			Model:         v.Model.String,
+			Year:          int32(v.Year.Int64),
+			Kilometers:    int32(v.Kilometers.Int64),
+		})
 	}
 
 	if err = rows.Err(); err != nil {
