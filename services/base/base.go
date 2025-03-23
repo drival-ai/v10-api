@@ -60,18 +60,18 @@ func (s *svc) RegisterVehicle(ctx context.Context, in *base.RegisterVehicleReque
 
 	vehicleId := uuid.New().String()
 	var q strings.Builder
-	fmt.Fprintf(&q, "insert into vehicles (id, chassis_numer, vin, ")
+	fmt.Fprintf(&q, "insert into vehicles (id, chassis_number, vin, ")
 	fmt.Fprintf(&q, "make, model, year, kms, user_id) ")
 	fmt.Fprintf(&q, "values (@id, @chassis_number, @vin, ")
 	fmt.Fprintf(&q, "@make, @model, @year, @kms, @user_id)")
 	args := pgx.NamedArgs{
-		"id":            vehicleId,
-		"chassis_numer": in.Vehicle.ChassisNumber,
-		"make":          in.Vehicle.Make,
-		"model":         in.Vehicle.Model,
-		"year":          in.Vehicle.Year,
-		"kms":           in.Vehicle.Kilometers,
-		"user_id":       s.Config.UserInfo.Id,
+		"id":             vehicleId,
+		"chassis_number": in.Vehicle.ChassisNumber,
+		"make":           in.Vehicle.Make,
+		"model":          in.Vehicle.Model,
+		"year":           in.Vehicle.Year,
+		"kms":            in.Vehicle.Kilometers,
+		"user_id":        s.Config.UserInfo.Id,
 	}
 
 	_, err := global.PgxPool.Exec(ctx, q.String(), args)

@@ -72,3 +72,20 @@ func (s *service) RegisterVehicle(ctx context.Context, req *basepb.RegisterVehic
 
 	return base.New((*base.Config)(&config)).RegisterVehicle(ctx, req)
 }
+
+func (s *service) ListVehicles(ctx context.Context, req *basepb.ListVehiclesRequest) (*basepb.ListVehiclesResponse, error) {
+	id := ctx.Value(internal.CtxKeyId)
+	email := ctx.Value(internal.CtxKeyEmail)
+	name := ctx.Value(internal.CtxKeyName)
+	config := base.Config{
+		UserInfo: internal.UserInfo{
+			Id:    id.(string),
+			Email: email.(string),
+			Name:  name.(string),
+		},
+		Config:     s.Config,
+		PrivateKey: s.PrivateKey,
+	}
+
+	return base.New((*base.Config)(&config)).ListVehicles(ctx, req)
+}
