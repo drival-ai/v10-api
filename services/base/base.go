@@ -137,4 +137,23 @@ func (s *svc) ListVehicles(ctx context.Context, in *base.ListVehiclesRequest) (*
 	return &base.ListVehiclesResponse{Vehicles: vehicles}, nil
 }
 
+func (s *svc) DeleteVehicle(ctx context.Context, in *base.DeleteVehicleRequest) (*emptypb.Empty, error) {
+	b, _ := json.Marshal(in)
+	glog.Infof("DeleteVehicle input=%v", string(b))
+	if in.Id == "" {
+		return nil, status.Errorf(codes.InvalidArgument, "id is empty")
+	}
+
+	var q strings.Builder
+	fmt.Fprintf(&q, "delete from vehicles where id = $1 and user_id = $2")
+	_, err := global.PgxPool.Exec(ctx, q.String(), in.Id, s.Config.UserInfo.Id)
+	if err != nil {
+		glog.Errorf("Exec failed: %v", err)
+		return nil, internal.InternalErr
+	}
+
+	glog.Info("DeleteVehicle success!")
+	return &emptypb.Empty{}, nil
+}
+
 func New(config *Config) *svc { return &svc{Config: config} }
