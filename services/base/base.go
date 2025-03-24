@@ -141,4 +141,38 @@ func (s *svc) DeleteVehicle(ctx context.Context, in *base.DeleteVehicleRequest) 
 	return &emptypb.Empty{}, nil
 }
 
+func (s *svc) UpdateVehicle(ctx context.Context, in *base.UpdateVehicleRequest) (*emptypb.Empty, error) {
+	b, _ := json.Marshal(in)
+	glog.Infof("UpdateVehicle input=%v", string(b))
+	if in.Vehicle.Vin == "" {
+		return nil, status.Errorf(codes.InvalidArgument, "vin is empty")
+	}
+
+	if in.Vehicle == nil {
+		return nil, status.Errorf(codes.InvalidArgument, "vehicle is nil")
+	}
+
+	var q strings.Builder
+	fmt.Fprintf(&q, "update vehicles set ")
+	fmt.Fprintf(&q, "make = @make, model = @model, year = @year, kms = @kms ")
+	fmt.Fprintf(&q, "where vin = @vin and user_id = @user_id")
+	args := pgx.NamedArgs{
+		"vin":     in.Vehicle.Vin,
+		"make":    in.Vehicle.Make,
+		"model":   in.Vehicle.Model,
+		"year":    in.Vehicle.Year,
+		"kms":     in.Vehicle.Kilometers,
+		"user_id": s.Config.UserInfo.Id,
+	}
+
+	_, err := global.PgxPool.Exec(ctx, q.String(), args)
+	if err != nil {
+		glog.Errorf("Exec failed: %v", err)
+		return nil, internal.InternalErr
+	}
+
+	glog.Info("UpdateVehicle success!")
+	return &emptypb.Empty{}, nil
+}
+
 func New(config *Config) *svc { return &svc{Config: config} }

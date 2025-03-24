@@ -106,3 +106,20 @@ func (s *service) DeleteVehicle(ctx context.Context, req *basepb.DeleteVehicleRe
 
 	return base.New((*base.Config)(&config)).DeleteVehicle(ctx, req)
 }
+
+func (s *service) UpdateVehicle(ctx context.Context, req *basepb.UpdateVehicleRequest) (*emptypb.Empty, error) {
+	id := ctx.Value(internal.CtxKeyId)
+	email := ctx.Value(internal.CtxKeyEmail)
+	name := ctx.Value(internal.CtxKeyName)
+	config := base.Config{
+		UserInfo: internal.UserInfo{
+			Id:    id.(string),
+			Email: email.(string),
+			Name:  name.(string),
+		},
+		Config:     s.Config,
+		PrivateKey: s.PrivateKey,
+	}
+
+	return base.New((*base.Config)(&config)).UpdateVehicle(ctx, req)
+}
