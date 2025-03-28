@@ -123,3 +123,54 @@ func (s *service) UpdateVehicle(ctx context.Context, req *basepb.UpdateVehicleRe
 
 	return base.New((*base.Config)(&config)).UpdateVehicle(ctx, req)
 }
+
+func (s *service) UpdateUserMetadata(ctx context.Context, req *basepb.UpdateUserMetadataRequest) (*emptypb.Empty, error) {
+	id := ctx.Value(internal.CtxKeyId)
+	email := ctx.Value(internal.CtxKeyEmail)
+	name := ctx.Value(internal.CtxKeyName)
+	config := base.Config{
+		UserInfo: internal.UserInfo{
+			Id:    id.(string),
+			Email: email.(string),
+			Name:  name.(string),
+		},
+		Config:     s.Config,
+		PrivateKey: s.PrivateKey,
+	}
+
+	return base.New((*base.Config)(&config)).UpdateUserMetadata(ctx, req)
+}
+
+func (s *service) GetUserMetadata(ctx context.Context, req *basepb.GetUserMetadataRequest) (*basepb.GetUserMetadataResponse, error) {
+	id := ctx.Value(internal.CtxKeyId)
+	email := ctx.Value(internal.CtxKeyEmail)
+	name := ctx.Value(internal.CtxKeyName)
+	config := base.Config{
+		UserInfo: internal.UserInfo{
+			Id:    id.(string),
+			Email: email.(string),
+			Name:  name.(string),
+		},
+		Config:     s.Config,
+		PrivateKey: s.PrivateKey,
+	}
+
+	return base.New((*base.Config)(&config)).GetUserMetadata(ctx, req)
+}
+
+func (s *service) StartTrip(ctx context.Context, req *basepb.StartTripRequest) (*emptypb.Empty, error) {
+	id := ctx.Value(internal.CtxKeyId)
+	email := ctx.Value(internal.CtxKeyEmail)
+	name := ctx.Value(internal.CtxKeyName)
+	config := base.Config{
+		UserInfo: internal.UserInfo{
+			Id:    id.(string),
+			Email: email.(string),
+			Name:  name.(string),
+		},
+		Config:     s.Config,
+		PrivateKey: s.PrivateKey,
+	}
+
+	return base.New((*base.Config)(&config)).StartTrip(ctx, req)
+}
