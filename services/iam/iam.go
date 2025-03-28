@@ -139,6 +139,20 @@ func (s *svc) Login(ctx context.Context, req *iam.LoginRequest) (*iam.LoginRespo
 			glog.Errorf("Exec failed: %v", err)
 			return nil, internal.InternalErr
 		}
+
+		q.Reset()
+		fmt.Fprintf(&q, "insert into usermetadata (id, rank, points) ")
+		fmt.Fprintf(&q, "values (@id, @rank, @points)")
+		args = pgx.NamedArgs{
+			"id":     sub,
+			"rank":   "bronze", // default value
+			"points": 0,        // default value
+		}
+		_, err = global.PgxPool.Exec(ctx, q.String(), args)
+		if err != nil {
+			glog.Errorf("Exec failed: %v", err)
+			return nil, internal.InternalErr
+		}
 	}
 
 	currentTime := time.Now().UTC()
