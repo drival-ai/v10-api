@@ -26,6 +26,7 @@ const (
 	V10_DeleteVehicle_FullMethodName      = "/v10proto.base.v1.V10/DeleteVehicle"
 	V10_UpdateVehicle_FullMethodName      = "/v10proto.base.v1.V10/UpdateVehicle"
 	V10_UpdateUserMetadata_FullMethodName = "/v10proto.base.v1.V10/UpdateUserMetadata"
+	V10_GetUserMetadata_FullMethodName    = "/v10proto.base.v1.V10/GetUserMetadata"
 	V10_StartTrip_FullMethodName          = "/v10proto.base.v1.V10/StartTrip"
 )
 
@@ -47,6 +48,8 @@ type V10Client interface {
 	UpdateVehicle(ctx context.Context, in *UpdateVehicleRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// Update user metadata by id.
 	UpdateUserMetadata(ctx context.Context, in *UpdateUserMetadataRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	// Get user metadata by id.
+	GetUserMetadata(ctx context.Context, in *GetUserMetadataRequest, opts ...grpc.CallOption) (*GetUserMetadataResponse, error)
 	// Start a trip.
 	StartTrip(ctx context.Context, in *StartTripRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
@@ -119,6 +122,16 @@ func (c *v10Client) UpdateUserMetadata(ctx context.Context, in *UpdateUserMetada
 	return out, nil
 }
 
+func (c *v10Client) GetUserMetadata(ctx context.Context, in *GetUserMetadataRequest, opts ...grpc.CallOption) (*GetUserMetadataResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetUserMetadataResponse)
+	err := c.cc.Invoke(ctx, V10_GetUserMetadata_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *v10Client) StartTrip(ctx context.Context, in *StartTripRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(emptypb.Empty)
@@ -147,6 +160,8 @@ type V10Server interface {
 	UpdateVehicle(context.Context, *UpdateVehicleRequest) (*emptypb.Empty, error)
 	// Update user metadata by id.
 	UpdateUserMetadata(context.Context, *UpdateUserMetadataRequest) (*emptypb.Empty, error)
+	// Get user metadata by id.
+	GetUserMetadata(context.Context, *GetUserMetadataRequest) (*GetUserMetadataResponse, error)
 	// Start a trip.
 	StartTrip(context.Context, *StartTripRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedV10Server()
@@ -173,6 +188,9 @@ func (UnimplementedV10Server) UpdateVehicle(context.Context, *UpdateVehicleReque
 }
 func (UnimplementedV10Server) UpdateUserMetadata(context.Context, *UpdateUserMetadataRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateUserMetadata not implemented")
+}
+func (UnimplementedV10Server) GetUserMetadata(context.Context, *GetUserMetadataRequest) (*GetUserMetadataResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserMetadata not implemented")
 }
 func (UnimplementedV10Server) StartTrip(context.Context, *StartTripRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method StartTrip not implemented")
@@ -298,6 +316,24 @@ func _V10_UpdateUserMetadata_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _V10_GetUserMetadata_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserMetadataRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(V10Server).GetUserMetadata(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: V10_GetUserMetadata_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(V10Server).GetUserMetadata(ctx, req.(*GetUserMetadataRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _V10_StartTrip_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(StartTripRequest)
 	if err := dec(in); err != nil {
@@ -346,6 +382,10 @@ var V10_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateUserMetadata",
 			Handler:    _V10_UpdateUserMetadata_Handler,
+		},
+		{
+			MethodName: "GetUserMetadata",
+			Handler:    _V10_GetUserMetadata_Handler,
 		},
 		{
 			MethodName: "StartTrip",

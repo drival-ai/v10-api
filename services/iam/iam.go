@@ -141,7 +141,7 @@ func (s *svc) Login(ctx context.Context, req *iam.LoginRequest) (*iam.LoginRespo
 		}
 
 		q.Reset()
-		fmt.Fprintf(&q, "insert into usermetadata (id, rank, points) ")
+		fmt.Fprintf(&q, "insert into usersmetadata (id, rank, points) ")
 		fmt.Fprintf(&q, "values (@id, @rank, @points)")
 		args = pgx.NamedArgs{
 			"id":     sub,
