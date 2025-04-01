@@ -158,7 +158,7 @@ func (s *service) GetUserMetadata(ctx context.Context, req *basepb.GetUserMetada
 	return base.New((*base.Config)(&config)).GetUserMetadata(ctx, req)
 }
 
-func (s *service) StartTrip(ctx context.Context, req *basepb.StartTripRequest) (*emptypb.Empty, error) {
+func (s *service) StartTrip(ctx context.Context, req *basepb.StartTripRequest) (*basepb.StartTripResponse, error) {
 	id := ctx.Value(internal.CtxKeyId)
 	email := ctx.Value(internal.CtxKeyEmail)
 	name := ctx.Value(internal.CtxKeyName)
@@ -173,4 +173,55 @@ func (s *service) StartTrip(ctx context.Context, req *basepb.StartTripRequest) (
 	}
 
 	return base.New((*base.Config)(&config)).StartTrip(ctx, req)
+}
+
+func (s *service) UpdateTrip(ctx context.Context, req *basepb.UpdateTripRequest) (*emptypb.Empty, error) {
+	id := ctx.Value(internal.CtxKeyId)
+	email := ctx.Value(internal.CtxKeyEmail)
+	name := ctx.Value(internal.CtxKeyName)
+	config := base.Config{
+		UserInfo: internal.UserInfo{
+			Id:    id.(string),
+			Email: email.(string),
+			Name:  name.(string),
+		},
+		Config:     s.Config,
+		PrivateKey: s.PrivateKey,
+	}
+
+	return base.New((*base.Config)(&config)).UpdateTrip(ctx, req)
+}
+
+func (s *service) ListTrips(ctx context.Context, req *basepb.ListTripsRequest) (*basepb.ListTripsResponse, error) {
+	id := ctx.Value(internal.CtxKeyId)
+	email := ctx.Value(internal.CtxKeyEmail)
+	name := ctx.Value(internal.CtxKeyName)
+	config := base.Config{
+		UserInfo: internal.UserInfo{
+			Id:    id.(string),
+			Email: email.(string),
+			Name:  name.(string),
+		},
+		Config:     s.Config,
+		PrivateKey: s.PrivateKey,
+	}
+
+	return base.New((*base.Config)(&config)).ListTrips(ctx, req)
+}
+
+func (s *service) EndTrip(ctx context.Context, req *basepb.EndTripRequest) (*emptypb.Empty, error) {
+	id := ctx.Value(internal.CtxKeyId)
+	email := ctx.Value(internal.CtxKeyEmail)
+	name := ctx.Value(internal.CtxKeyName)
+	config := base.Config{
+		UserInfo: internal.UserInfo{
+			Id:    id.(string),
+			Email: email.(string),
+			Name:  name.(string),
+		},
+		Config:     s.Config,
+		PrivateKey: s.PrivateKey,
+	}
+
+	return base.New((*base.Config)(&config)).EndTrip(ctx, req)
 }
