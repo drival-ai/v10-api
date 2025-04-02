@@ -137,7 +137,7 @@ func (s *svc) ListTrips(ctx context.Context, in *base.ListTripsRequest) (*base.L
 	}
 	defer rows.Close()
 
-	var vehicles []*base.Trip
+	var trips []*base.Trip
 	for rows.Next() {
 		var v Trip
 		err = rows.Scan(&v.Id,
@@ -146,7 +146,7 @@ func (s *svc) ListTrips(ctx context.Context, in *base.ListTripsRequest) (*base.L
 			glog.Errorf("Scan failed: %v", err)
 			return nil, internal.InternalErr
 		}
-		vehicles = append(vehicles, &base.Trip{
+		trips = append(trips, &base.Trip{
 			Id:        v.Id.String,
 			Vin:       v.Vin.String,
 			StartTime: v.StartTime.String,
@@ -162,5 +162,5 @@ func (s *svc) ListTrips(ctx context.Context, in *base.ListTripsRequest) (*base.L
 	}
 
 	glog.Infof("ListTrips success!")
-	return &base.ListTripsResponse{}, nil
+	return &base.ListTripsResponse{Trips: trips}, nil
 }
