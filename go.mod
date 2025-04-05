@@ -3,7 +3,7 @@ module github.com/drival-ai/v10-api
 go 1.24.1
 
 require (
-	github.com/drival-ai/v10-go v0.1.16
+	github.com/drival-ai/v10-go v0.1.17
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/golang/glog v1.2.4
 	github.com/google/uuid v1.6.0

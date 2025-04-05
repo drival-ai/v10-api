@@ -19,13 +19,14 @@ import (
 )
 
 type Trip struct {
-	Id        sql.NullString
-	Vin       sql.NullString
-	UserId    sql.NullString
-	StartTime sql.NullString
-	EndTime   sql.NullString
-	Distance  sql.NullFloat64
-	Points    sql.NullInt32
+	Id          sql.NullString
+	Vin         sql.NullString
+	UserId      sql.NullString
+	StartTime   sql.NullString
+	EndTime     sql.NullString
+	Distance    sql.NullFloat64
+	Points      sql.NullInt32
+	MapSnapshot sql.NullString
 }
 
 func (s *svc) StartTrip(ctx context.Context, in *base.StartTripRequest) (*base.StartTripResponse, error) {
@@ -103,16 +104,20 @@ func (s *svc) EndTrip(ctx context.Context, in *base.EndTripRequest) (*emptypb.Em
 	if in.Distance < 0 {
 		return nil, status.Errorf(codes.InvalidArgument, "distance could not be negative")
 	}
+	if in.MapSnapshot == "" {
+		return nil, status.Errorf(codes.InvalidArgument, "map snapshot is empty")
+	}
 
 	var q strings.Builder
 	fmt.Fprintf(&q, "update trips set end_time = @end_time, ")
-	fmt.Fprintf(&q, "distance = @distance, points = @points where id = @id and user_id = @user_id")
+	fmt.Fprintf(&q, "distance = @distance, points = @points, map_snapshot = @map_snapshot where id = @id and user_id = @user_id")
 	args := pgx.NamedArgs{
-		"id":       in.Id,
-		"end_time": in.EndTime,
-		"distance": in.Distance,
-		"points":   in.Points,
-		"user_id":  s.Config.UserInfo.Id,
+		"id":           in.Id,
+		"end_time":     in.EndTime,
+		"distance":     in.Distance,
+		"points":       in.Points,
+		"map_snapshot": in.MapSnapshot,
+		"user_id":      s.Config.UserInfo.Id,
 	}
 	_, err := global.PgxPool.Exec(ctx, q.String(), args)
 	if err != nil {
@@ -127,7 +132,7 @@ func (s *svc) EndTrip(ctx context.Context, in *base.EndTripRequest) (*emptypb.Em
 func (s *svc) ListTrips(ctx context.Context, in *base.ListTripsRequest) (*base.ListTripsResponse, error) {
 	var q strings.Builder
 	fmt.Fprintf(&q, "select id, ")
-	fmt.Fprintf(&q, "vin, start_time, end_time, distance, points ")
+	fmt.Fprintf(&q, "vin, start_time, end_time, distance, points, map_snapshot ")
 	fmt.Fprintf(&q, "from trips ")
 	fmt.Fprintf(&q, "where user_id = $1")
 	rows, err := global.PgxPool.Query(ctx, q.String(), s.Config.UserInfo.Id)
@@ -141,18 +146,19 @@ func (s *svc) ListTrips(ctx context.Context, in *base.ListTripsRequest) (*base.L
 	for rows.Next() {
 		var v Trip
 		err = rows.Scan(&v.Id,
-			&v.Vin, &v.StartTime, &v.EndTime, &v.Distance, &v.Points)
+			&v.Vin, &v.StartTime, &v.EndTime, &v.Distance, &v.Points, &v.MapSnapshot)
 		if err != nil {
 			glog.Errorf("Scan failed: %v", err)
 			return nil, internal.InternalErr
 		}
 		trips = append(trips, &base.Trip{
-			Id:        v.Id.String,
-			Vin:       v.Vin.String,
-			StartTime: v.StartTime.String,
-			EndTime:   v.EndTime.String,
-			Distance:  float32(v.Distance.Float64),
-			Points:    int32(v.Points.Int32),
+			Id:          v.Id.String,
+			Vin:         v.Vin.String,
+			StartTime:   v.StartTime.String,
+			EndTime:     v.EndTime.String,
+			Distance:    float32(v.Distance.Float64),
+			Points:      int32(v.Points.Int32),
+			MapSnapshot: v.MapSnapshot.String,
 		})
 	}
 
