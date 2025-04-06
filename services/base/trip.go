@@ -129,7 +129,8 @@ func (s *svc) EndTrip(ctx context.Context, in *base.EndTripRequest) (*emptypb.Em
 	return &emptypb.Empty{}, nil
 }
 
-func (s *svc) ListTrips(ctx context.Context, in *base.ListTripsRequest) (*base.ListTripsResponse, error) {
+func (s *svc) ListTrips(in *base.ListTripsRequest, stream base.V10_ListTripsServer) error {
+	ctx := stream.Context()
 	var q strings.Builder
 	fmt.Fprintf(&q, "select id, ")
 	fmt.Fprintf(&q, "vin, start_time, end_time, distance, points, map_snapshot ")
@@ -138,35 +139,38 @@ func (s *svc) ListTrips(ctx context.Context, in *base.ListTripsRequest) (*base.L
 	rows, err := global.PgxPool.Query(ctx, q.String(), s.Config.UserInfo.Id)
 	if err != nil {
 		glog.Errorf("Query failed: %v", err)
-		return nil, internal.InternalErr
+		return internal.InternalErr
 	}
 	defer rows.Close()
 
-	var trips []*base.Trip
 	for rows.Next() {
 		var v Trip
 		err = rows.Scan(&v.Id,
 			&v.Vin, &v.StartTime, &v.EndTime, &v.Distance, &v.Points, &v.MapSnapshot)
 		if err != nil {
 			glog.Errorf("Scan failed: %v", err)
-			return nil, internal.InternalErr
+			return internal.InternalErr
 		}
-		trips = append(trips, &base.Trip{
+
+		if err = stream.Send(&base.Trip{
 			Id:          v.Id.String,
 			Vin:         v.Vin.String,
 			StartTime:   v.StartTime.String,
 			EndTime:     v.EndTime.String,
 			Distance:    float32(v.Distance.Float64),
-			Points:      int32(v.Points.Int32),
+			Points:      v.Points.Int32,
 			MapSnapshot: v.MapSnapshot.String,
-		})
+		}); err != nil {
+			glog.Errorf("Send failed: %v", err)
+			return internal.InternalErr
+		}
 	}
 
 	if err = rows.Err(); err != nil {
 		glog.Errorf("rows.Err failed: %v", err)
-		return nil, internal.InternalErr
+		return internal.InternalErr
 	}
 
 	glog.Infof("ListTrips success!")
-	return &base.ListTripsResponse{Trips: trips}, nil
+	return nil
 }

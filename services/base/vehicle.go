@@ -82,7 +82,8 @@ func (s *svc) RegisterVehicle(ctx context.Context, in *base.RegisterVehicleReque
 	return &emptypb.Empty{}, nil
 }
 
-func (s *svc) ListVehicles(ctx context.Context, in *base.ListVehiclesRequest) (*base.ListVehiclesResponse, error) {
+func (s *svc) ListVehicles(in *base.ListVehiclesRequest, stream base.V10_ListVehiclesServer) error {
+	ctx := stream.Context()
 	var q strings.Builder
 	fmt.Fprintf(&q, "select vin, ")
 	fmt.Fprintf(&q, "make, model, year, kms ")
@@ -91,35 +92,38 @@ func (s *svc) ListVehicles(ctx context.Context, in *base.ListVehiclesRequest) (*
 	rows, err := global.PgxPool.Query(ctx, q.String(), s.Config.UserInfo.Id)
 	if err != nil {
 		glog.Errorf("Query failed: %v", err)
-		return nil, internal.InternalErr
+		return internal.InternalErr
 	}
 	defer rows.Close()
 
-	var vehicles []*base.Vehicle
 	for rows.Next() {
 		var v Vehicle
 		err = rows.Scan(&v.Vin,
 			&v.Make, &v.Model, &v.Year, &v.Kilometers)
 		if err != nil {
 			glog.Errorf("Scan failed: %v", err)
-			return nil, internal.InternalErr
+			return internal.InternalErr
 		}
-		vehicles = append(vehicles, &base.Vehicle{
+
+		if err = stream.Send(&base.Vehicle{
 			Vin:        v.Vin.String,
 			Make:       v.Make.String,
 			Model:      v.Model.String,
 			Year:       int32(v.Year.Int64),
 			Kilometers: int32(v.Kilometers.Int64),
-		})
+		}); err != nil {
+			glog.Errorf("Send failed: %v", err)
+			return internal.InternalErr
+		}
 	}
 
 	if err = rows.Err(); err != nil {
 		glog.Errorf("rows.Err failed: %v", err)
-		return nil, internal.InternalErr
+		return internal.InternalErr
 	}
 
 	glog.Infof("ListVehicles success!")
-	return &base.ListVehiclesResponse{Vehicles: vehicles}, nil
+	return nil
 }
 
 func (s *svc) DeleteVehicle(ctx context.Context, in *base.DeleteVehicleRequest) (*emptypb.Empty, error) {

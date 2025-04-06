@@ -73,7 +73,8 @@ func (s *service) RegisterVehicle(ctx context.Context, req *basepb.RegisterVehic
 	return base.New((*base.Config)(&config)).RegisterVehicle(ctx, req)
 }
 
-func (s *service) ListVehicles(ctx context.Context, req *basepb.ListVehiclesRequest) (*basepb.ListVehiclesResponse, error) {
+func (s *service) ListVehicles(in *basepb.ListVehiclesRequest, stream basepb.V10_ListVehiclesServer) error {
+	ctx := stream.Context()
 	id := ctx.Value(internal.CtxKeyId)
 	email := ctx.Value(internal.CtxKeyEmail)
 	name := ctx.Value(internal.CtxKeyName)
@@ -87,7 +88,7 @@ func (s *service) ListVehicles(ctx context.Context, req *basepb.ListVehiclesRequ
 		PrivateKey: s.PrivateKey,
 	}
 
-	return base.New((*base.Config)(&config)).ListVehicles(ctx, req)
+	return base.New((*base.Config)(&config)).ListVehicles(in, stream)
 }
 
 func (s *service) DeleteVehicle(ctx context.Context, req *basepb.DeleteVehicleRequest) (*emptypb.Empty, error) {
@@ -192,7 +193,8 @@ func (s *service) UpdateTrip(ctx context.Context, req *basepb.UpdateTripRequest)
 	return base.New((*base.Config)(&config)).UpdateTrip(ctx, req)
 }
 
-func (s *service) ListTrips(ctx context.Context, req *basepb.ListTripsRequest) (*basepb.ListTripsResponse, error) {
+func (s *service) ListTrips(in *basepb.ListTripsRequest, stream basepb.V10_ListTripsServer) error {
+	ctx := stream.Context()
 	id := ctx.Value(internal.CtxKeyId)
 	email := ctx.Value(internal.CtxKeyEmail)
 	name := ctx.Value(internal.CtxKeyName)
@@ -206,7 +208,7 @@ func (s *service) ListTrips(ctx context.Context, req *basepb.ListTripsRequest) (
 		PrivateKey: s.PrivateKey,
 	}
 
-	return base.New((*base.Config)(&config)).ListTrips(ctx, req)
+	return base.New((*base.Config)(&config)).ListTrips(in, stream)
 }
 
 func (s *service) EndTrip(ctx context.Context, req *basepb.EndTripRequest) (*emptypb.Empty, error) {
