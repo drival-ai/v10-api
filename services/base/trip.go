@@ -73,9 +73,16 @@ func (s *svc) UpdateTrip(ctx context.Context, in *base.UpdateTripRequest) (*empt
 		return nil, status.Errorf(codes.InvalidArgument, "trip id is empty")
 	}
 
+	tx, err := global.PgxPool.Begin(ctx)
+	if err != nil {
+		glog.Errorf("Failed to begin transaction: %v", err)
+		return nil, internal.InternalErr
+	}
+	defer tx.Rollback(ctx)
+
 	var q strings.Builder
 	fmt.Fprintf(&q, "update trips set points = @points, ")
-	fmt.Fprintf(&q, "distance = @distance, end_time = @end_time, map_snapshot = @map_snapshot  where id = @id and user_id = @user_id")
+	fmt.Fprintf(&q, "distance = @distance, end_time = @end_time, map_snapshot = @map_snapshot where id = @id and user_id = @user_id")
 	args := pgx.NamedArgs{
 		"id":           in.Id,
 		"user_id":      s.Config.UserInfo.Id,
@@ -84,13 +91,39 @@ func (s *svc) UpdateTrip(ctx context.Context, in *base.UpdateTripRequest) (*empt
 		"end_time":     in.Trip.EndTime,
 		"map_snapshot": in.Trip.MapSnapshot,
 	}
-	_, err := global.PgxPool.Exec(ctx, q.String(), args)
+	_, err = tx.Exec(ctx, q.String(), args)
 	if err != nil {
-		glog.Errorf("Exec failed: %v", err)
+		glog.Errorf("Trip update failed: %v", err)
 		return nil, internal.InternalErr
 	}
 
-	glog.Info("UpdateTrip success!")
+	q.Reset()
+	fmt.Fprintf(&q, "UPDATE usersmetadata SET ")
+	fmt.Fprintf(&q, "points = points + @earned_points, ")
+	fmt.Fprintf(&q, "rank = CASE ")
+	fmt.Fprintf(&q, "WHEN points + @earned_points >= 10000 THEN 'platinum' ")
+	fmt.Fprintf(&q, "WHEN points + @earned_points >= 5000 THEN 'gold' ")
+	fmt.Fprintf(&q, "WHEN points + @earned_points >= 1000 THEN 'silver' ")
+	fmt.Fprintf(&q, "ELSE 'bronze' END ")
+	fmt.Fprintf(&q, "WHERE id = @user_id")
+
+	userArgs := pgx.NamedArgs{
+		"earned_points": in.Trip.Points,
+		"user_id":       s.Config.UserInfo.Id,
+	}
+
+	_, err = tx.Exec(ctx, q.String(), userArgs)
+	if err != nil {
+		glog.Errorf("User metadata update failed: %v", err)
+		return nil, internal.InternalErr
+	}
+
+	if err = tx.Commit(ctx); err != nil {
+		glog.Errorf("Failed to commit transaction: %v", err)
+		return nil, internal.InternalErr
+	}
+
+	glog.Info("UpdateTrip success with user metadata update!")
 	return &emptypb.Empty{}, nil
 }
 
@@ -110,6 +143,13 @@ func (s *svc) EndTrip(ctx context.Context, in *base.EndTripRequest) (*emptypb.Em
 		return nil, status.Errorf(codes.InvalidArgument, "map snapshot is empty")
 	}
 
+	tx, err := global.PgxPool.Begin(ctx)
+	if err != nil {
+		glog.Errorf("Failed to begin transaction: %v", err)
+		return nil, internal.InternalErr
+	}
+	defer tx.Rollback(ctx)
+
 	var q strings.Builder
 	fmt.Fprintf(&q, "update trips set end_time = @end_time, ")
 	fmt.Fprintf(&q, "distance = @distance, points = @points, map_snapshot = @map_snapshot where id = @id and user_id = @user_id")
@@ -121,13 +161,39 @@ func (s *svc) EndTrip(ctx context.Context, in *base.EndTripRequest) (*emptypb.Em
 		"map_snapshot": in.MapSnapshot,
 		"user_id":      s.Config.UserInfo.Id,
 	}
-	_, err := global.PgxPool.Exec(ctx, q.String(), args)
+	_, err = tx.Exec(ctx, q.String(), args)
 	if err != nil {
-		glog.Errorf("Exec failed: %v", err)
+		glog.Errorf("Trip update failed: %v", err)
 		return nil, internal.InternalErr
 	}
 
-	glog.Info("EndTrip success!")
+	q.Reset()
+	fmt.Fprintf(&q, "UPDATE usersmetadata SET ")
+	fmt.Fprintf(&q, "points = points + @earned_points, ")
+	fmt.Fprintf(&q, "rank = CASE ")
+	fmt.Fprintf(&q, "WHEN points + @earned_points >= 10000 THEN 'platinum' ")
+	fmt.Fprintf(&q, "WHEN points + @earned_points >= 5000 THEN 'gold' ")
+	fmt.Fprintf(&q, "WHEN points + @earned_points >= 1000 THEN 'silver' ")
+	fmt.Fprintf(&q, "ELSE 'bronze' END ")
+	fmt.Fprintf(&q, "WHERE id = @user_id")
+
+	userArgs := pgx.NamedArgs{
+		"earned_points": in.Points,
+		"user_id":       s.Config.UserInfo.Id,
+	}
+
+	_, err = tx.Exec(ctx, q.String(), userArgs)
+	if err != nil {
+		glog.Errorf("User metadata update failed: %v", err)
+		return nil, internal.InternalErr
+	}
+
+	if err = tx.Commit(ctx); err != nil {
+		glog.Errorf("Failed to commit transaction: %v", err)
+		return nil, internal.InternalErr
+	}
+
+	glog.Info("EndTrip success with user metadata update!")
 	return &emptypb.Empty{}, nil
 }
 
