@@ -75,12 +75,14 @@ func (s *svc) UpdateTrip(ctx context.Context, in *base.UpdateTripRequest) (*empt
 
 	var q strings.Builder
 	fmt.Fprintf(&q, "update trips set points = @points, ")
-	fmt.Fprintf(&q, "distance = @distance where id = @id and user_id = @user_id")
+	fmt.Fprintf(&q, "distance = @distance, end_time = @end_time, map_snapshot = @map_snapshot  where id = @id and user_id = @user_id")
 	args := pgx.NamedArgs{
-		"id":       in.Id,
-		"user_id":  s.Config.UserInfo.Id,
-		"points":   in.Trip.Points,
-		"distance": in.Trip.Distance,
+		"id":           in.Id,
+		"user_id":      s.Config.UserInfo.Id,
+		"points":       in.Trip.Points,
+		"distance":     in.Trip.Distance,
+		"end_time":     in.Trip.EndTime,
+		"map_snapshot": in.Trip.MapSnapshot,
 	}
 	_, err := global.PgxPool.Exec(ctx, q.String(), args)
 	if err != nil {
