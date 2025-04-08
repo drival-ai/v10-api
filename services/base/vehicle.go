@@ -33,7 +33,7 @@ type Vehicle struct {
 	Make       sql.NullString
 	Model      sql.NullString
 	Year       sql.NullInt64
-	Kilometers sql.NullInt64
+	Kilometers sql.NullFloat64
 }
 
 func (s *svc) RegisterVehicle(ctx context.Context, in *base.RegisterVehicleRequest) (*emptypb.Empty, error) {
@@ -110,7 +110,7 @@ func (s *svc) ListVehicles(in *base.ListVehiclesRequest, stream base.V10_ListVeh
 			Make:       v.Make.String,
 			Model:      v.Model.String,
 			Year:       int32(v.Year.Int64),
-			Kilometers: int32(v.Kilometers.Int64),
+			Kilometers: float32(v.Kilometers.Float64),
 		}); err != nil {
 			glog.Errorf("Send failed: %v", err)
 			return internal.InternalErr

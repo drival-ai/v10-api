@@ -97,6 +97,20 @@ func (s *svc) UpdateTrip(ctx context.Context, in *base.UpdateTripRequest) (*empt
 		return nil, internal.InternalErr
 	}
 
+	km := in.Trip.Distance / 1000 // convert to kilometers
+	q.Reset()
+	fmt.Fprintf(&q, "UPDATE vehicles SET kms = kms + @trip_distance WHERE vin = @vin AND user_id = @user_id")
+	vehicleArgs := pgx.NamedArgs{
+		"trip_distance": km,
+		"vin":           in.Trip.Vin,
+		"user_id":       s.Config.UserInfo.Id,
+	}
+	_, err = tx.Exec(ctx, q.String(), vehicleArgs)
+	if err != nil {
+		glog.Errorf("Vehicle kilometers update failed: %v", err)
+		return nil, internal.InternalErr
+	}
+
 	q.Reset()
 	fmt.Fprintf(&q, "UPDATE usersmetadata SET ")
 	fmt.Fprintf(&q, "points = points + @earned_points, ")
@@ -164,6 +178,20 @@ func (s *svc) EndTrip(ctx context.Context, in *base.EndTripRequest) (*emptypb.Em
 	_, err = tx.Exec(ctx, q.String(), args)
 	if err != nil {
 		glog.Errorf("Trip update failed: %v", err)
+		return nil, internal.InternalErr
+	}
+
+	kms := in.Distance / 1000
+	q.Reset()
+	fmt.Fprintf(&q, "UPDATE vehicles SET kms = kms + @trip_distance WHERE vin = @vin AND user_id = @user_id")
+	vehicleArgs := pgx.NamedArgs{
+		"trip_distance": kms,
+		"vin":           in.Vin,
+		"user_id":       s.Config.UserInfo.Id,
+	}
+	_, err = tx.Exec(ctx, q.String(), vehicleArgs)
+	if err != nil {
+		glog.Errorf("Vehicle kilometers update failed: %v", err)
 		return nil, internal.InternalErr
 	}
 
