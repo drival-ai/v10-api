@@ -227,3 +227,20 @@ func (s *service) EndTrip(ctx context.Context, req *basepb.EndTripRequest) (*emp
 
 	return base.New((*base.Config)(&config)).EndTrip(ctx, req)
 }
+
+func (s *service) DeleteTrip(ctx context.Context, req *basepb.DeleteTripRequest) (*emptypb.Empty, error) {
+	id := ctx.Value(internal.CtxKeyId)
+	email := ctx.Value(internal.CtxKeyEmail)
+	name := ctx.Value(internal.CtxKeyName)
+	config := base.Config{
+		UserInfo: internal.UserInfo{
+			Id:    id.(string),
+			Email: email.(string),
+			Name:  name.(string),
+		},
+		Config:     s.Config,
+		PrivateKey: s.PrivateKey,
+	}
+
+	return base.New((*base.Config)(&config)).DeleteTrip(ctx, req)
+}

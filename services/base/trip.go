@@ -270,3 +270,28 @@ func (s *svc) ListTrips(in *base.ListTripsRequest, stream base.V10_ListTripsServ
 	glog.Infof("ListTrips success!")
 	return nil
 }
+
+func (s *svc) DeleteTrip(ctx context.Context, in *base.DeleteTripRequest) (*emptypb.Empty, error) {
+	b, _ := json.Marshal(in)
+	glog.Infof("DeleteTrip input=%v", string(b))
+
+	if in.Id == "" {
+		return nil, status.Errorf(codes.InvalidArgument, "trip id is empty")
+	}
+
+	var q strings.Builder
+	fmt.Fprintf(&q, "delete from trips where id = @id and user_id = @user_id")
+	args := pgx.NamedArgs{
+		"id":      in.Id,
+		"user_id": s.Config.UserInfo.Id,
+	}
+
+	_, err := global.PgxPool.Exec(ctx, q.String(), args)
+	if err != nil {
+		glog.Errorf("Exec failed: %v", err)
+		return nil, internal.InternalErr
+	}
+
+	glog.Info("DeleteTrip success!")
+	return &emptypb.Empty{}, nil
+}
